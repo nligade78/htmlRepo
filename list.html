@@ -1,0 +1,64 @@
+<!-- HTML LIST - ORDER vs UNordered TAG -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List</title>
+    <style>
+        html{
+            background-color: #efefef;
+        }
+        h1{
+            font-weight: bold;
+        }
+        li{
+            text-transform: capitalize;
+        }
+    </style>
+</head>
+<body>
+    <h1>Html List tag</h1>
+    <ul style="list-style-type: circle;">
+        <li>apple</li>
+        <li>banana</li>
+        <li>mango</li>
+    </ul>
+    <hr/>
+    <ol style="list-style-type:lower-roman;">
+        <li>one</li>
+        <li>two</li>
+        <li>three</li>
+    </ol>
+
+    <hr/>
+
+    <h1>Nestesd list</h1>
+    <ul>
+        <li>Fruits
+            <ol>
+                <li>Banana</li>
+                <li>Apple
+                    <ul>
+                        <li>Red</li>
+                        <li>Green</li>
+                    </ul>
+                </li>
+                <li>Pears</li>
+            </ol>
+        </li>
+        <li>Vegetables</li>
+        <li>Meats</li>
+    </ul>
+
+    <hr/>
+    <h2>Navigation Menu</h2>
+    <ul style="list-style-type: none; display: flex; gap:15px">
+        <li> <a href="#">Home</a></li>
+        <li>About</li>
+        <li>Service</li>
+        <li>Contact</li>
+    </ul>
+</body>
+</html>
