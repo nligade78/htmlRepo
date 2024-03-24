@@ -1,0 +1,99 @@
+<!-- the <form> tag is used to create an HTMl form for user input
+    the <input> HTMl element is used to create interactive controls for web-based forms to accept data from the user.
+We must write inside the tag  -->
+
+<!-- input type="text" name="username
+we have multiple values for ther type attribute-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Tag</title>
+    <style>
+        h1{
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>HTML FORM</h1>
+    <form>
+        <div>
+            <label for="username">Username</label>
+            <input type="text" id="username">
+        </div>
+
+        <div>
+            <label for="email">Email</label>
+            <input type="email" id="email">
+        </div>
+        <div>
+            <label for="message">Message</label>
+            <textarea name="" id="message" cols="30" rows="10"></textarea>
+        </div>
+        <input type="button" value="submit">
+
+        <div>
+            <input type="radio" name="" id="">
+        </div>
+        <div>
+            <input type="checkbox" name="" id="">
+        </div>
+        <div>
+            <input type="color" name="" id="">
+        </div>
+        <div>
+            <input type="reset" value="">
+        </div>
+        <div>
+            <input type="number" max="3" min="1" value="1">
+        </div>
+        <div>
+            <label for="gender">Gender</label>
+            <input type="radio" name="gender"  value="Male"/>Male
+            <input type="radio" name="gender"  value="Female"/>Female
+            <input type="radio" name="gender"  value="TransGender"/>TransGender
+        </div>
+
+        <div>
+            <label for="hobbies">My Hobbies: </label>
+            <input type="checkbox" name="hobbies" id="" value="music"/>Music
+            <input type="checkbox" name="hobbies" id="" value="coding"/>Coding
+            <input type="checkbox" name="hobbies" id="" value="gaming"/>Gaming
+        </div>
+<hr/>
+        <div>
+                <label for="country"> My Country</label>
+                <select name="country" id="country">
+                    <option value="usa">USA</option>
+                    <option value="usa">India</option>
+                    <option value="usa">UK</option>
+                    <option value="usa">Canada</option>
+                </select>
+        </div>
+
+        <hr/>
+        <div>
+                <label for="country">Select My Country</label>
+                <input type="text" name="country" id="country" list="countries"/>
+                <datalist  id="countries">
+                    <option value="usa">USA</option>
+                    <option value="usa">India</option>
+                    <option value="usa">UK</option>
+                    <option value="usa">Canada</option>
+                </datalist>
+        </div>
+        <div>
+            <label for="file">Upload File</label>
+            <input type="file" src="" alt="">
+        </div>
+        <div>
+            <input type="button" value="submit">
+            <button type="submit">Submit</button>
+        </div>
+    </form>
+    
+</body>
+</html>
