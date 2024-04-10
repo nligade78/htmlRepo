@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Table with Actions and Popup Form</title>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+  .popup-form {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    z-index: 999;
+  }
+</style>
+</head>
+<body>
+
+<table id="example" class="display" style="width:100%">
+  <thead>
+    <tr>
+      <th>Action</th>
+      <th>Project Name</th>
+      <th>Project WBS Code</th>
+      <th>Type of Allowance</th>
+      <th>No. Of total Recipients</th>
+      <th>Total Allowance amount</th>
+      <th>Processing date</th>
+      <th>Approvers Name</th>
+      <th>Approval Date</th>
+      <th>Status</th>
+    </tr>
+    
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+
+<!-- Popup Form -->
+
+
+<div class="popup-form" id="popupForm">
+    <h2 id="formTitle"></h2>
+    <form id="editForm">
+      <!-- Input fields -->
+      <label for="email">Employee Email Id:</label>
+      <input type="text" id="email" name="email">
+      <br>
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name">
+      <br>
+      <label for="personalId">Personal ID:</label>
+      <input type="text" id="personalId" name="personalId">
+      <br>
+      <label for="projectName">Project Name:</label>
+      <input type="text" id="projectName" name="projectName">
+      <br>
+      <label for="wbsCode">Project WBS Code:</label>
+      <input type="text" id="wbsCode" name="wbsCode">
+      <br>
+      <label for="allowanceType">Type Of Allowance:</label>
+      <input type="text" id="allowanceType" name="allowanceType">
+      <br>
+      <label for="amount">Amount:</label>
+      <input type="text" id="amount" name="amount">
+      <br>
+      <label for="level">Level:</label>
+      <input type="text" id="level" name="level">
+      <br>
+      <label for="func">Function:</label>
+      <input type="text" id="func" name="func">
+      <br>
+      <label for="serviceOffering">Service Offering:</label>
+      <input type="text" id="serviceOffering" name="serviceOffering">
+      <br>
+      <label for="status">Employee Status:</label>
+      <input type="text" id="status" name="status">
+      <br>
+      <label for="dates">Dates:</label>
+      <input type="text" id="dates" name="dates">
+      <br>
+      <button type="submit">Save</button>
+      <button type="button" onclick="closePopupForm()">Cancel</button>
+    </form>
+  </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
+<script>
+  $(document).ready(function() {
+    var table = $('#example').DataTable({
+      ajax: {
+        url: 'data.json', // Path to your JSON file
+        dataSrc: 'data' // Set dataSrc to an empty string to read the data from the root of JSON
+      },
+      columns: [
+      { 
+      data: null,
+      title: 'Action', // Column header for the action buttons
+      render: function(data, type, row) {
+        return '<button class="edit-btn"><i class="fas fa-edit"></i></button><button class="delete-btn"><i class="fas fa-trash-alt"></i></button>';
+      }
+    },
+        // { data: null, defaultContent: '<button class="edit-btn"><i class="fas fa-edit"></i></button><button class="delete-btn"><i class="fas fa-trash-alt"></i></button>' },
+        { data: 'Project_Name' },
+        { data: 'Project_WBS_Code' },
+        { data: 'Type_of_Allowance' },
+        { data: 'No_Of_total_Recipients' },
+        { data: 'Total_Allowance_amount' },
+        { data: 'Processing_date' },
+        { data: 'Approvers_Name' },
+        { data: 'Approval_Date' },
+        { data: 'Status' }
+      ],
+      
+    });
+
+    $('#example').on('click', '.edit-btn', function() {
+      var data = table.row($(this).closest('tr')).data();
+      openPopupForm('edit', data);
+    });
+
+    $('#example').on('click', '.delete-btn', function() {
+      var data = table.row($(this).closest('tr')).data();
+      openPopupForm('delete', data);
+    });
+  });
+
+  function openPopupForm(action, rowData) {
+    var formTitle = (action === 'edit') ? 'Edit Employee Details' : 'Delete Employee';
+    document.getElementById("formTitle").innerHTML = formTitle;
+
+    // Populate form fields with rowData if needed
+    // For example:
+    document.getElementById("email").value = rowData['Employee Email Id'];
+    document.getElementById("name").value = rowData['Name'];
+
+    document.getElementById("popupForm").style.display = "block";
+  }
+
+  function closePopupForm() {
+    document.getElementById("popupForm").style.display = "none";
+  }
+</script>
+
+</body>
+</html>

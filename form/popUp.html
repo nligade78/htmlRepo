@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Table with Actions and Popup Form</title>
+<style>
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  th {
+    background-color: #f2f2f2;
+  }
+  .popup-form {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    z-index: 999;
+  }
+</style>
+</head>
+<body>
+
+<table>
+  <thead>
+    <tr>
+      <th>Action</th>
+      <th>Project Name</th>
+      <th>Project WBS Code</th>
+      <th>Type of Allowance</th>
+      <th>No. Of total Recipients</th>
+      <th>Total Allowance amount</th>
+      <th>Processing date</th>
+      <th>Approvers Name</th>
+      <th>Approval Date</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <button onclick="openPopupForm('edit')">Edit</button>
+        <button onclick="openPopupForm('delete')">Delete</button>
+      </td>
+      <td>Project A</td>
+      <td>WBS-001</td>
+      <td>Travel</td>
+      <td>10</td>
+      <td>1000</td>
+      <td>2024-04-06</td>
+      <td>John Doe</td>
+      <td>2024-04-07</td>
+      <td>Approved</td>
+    </tr>
+    <!-- Add more rows as needed -->
+  </tbody>
+</table>
+
+<!-- Popup Form -->
+<div class="popup-form" id="popupForm">
+  <h2 id="formTitle"></h2>
+  <form id="editForm">
+    <!-- Input fields -->
+    <label for="email">Employee Email Id:</label>
+    <input type="text" id="email" name="email">
+    <br>
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name">
+    <br>
+    <label for="personalId">Personal ID:</label>
+    <input type="text" id="personalId" name="personalId">
+    <br>
+    <label for="projectName">Project Name:</label>
+    <input type="text" id="projectName" name="projectName">
+    <br>
+    <label for="wbsCode">Project WBS Code:</label>
+    <input type="text" id="wbsCode" name="wbsCode">
+    <br>
+    <label for="allowanceType">Type Of Allowance:</label>
+    <input type="text" id="allowanceType" name="allowanceType">
+    <br>
+    <label for="amount">Amount:</label>
+    <input type="text" id="amount" name="amount">
+    <br>
+    <label for="level">Level:</label>
+    <input type="text" id="level" name="level">
+    <br>
+    <label for="func">Function:</label>
+    <input type="text" id="func" name="func">
+    <br>
+    <label for="serviceOffering">Service Offering:</label>
+    <input type="text" id="serviceOffering" name="serviceOffering">
+    <br>
+    <label for="status">Employee Status:</label>
+    <input type="text" id="status" name="status">
+    <br>
+    <label for="dates">Dates:</label>
+    <input type="text" id="dates" name="dates">
+    <br>
+    <button type="submit">Save</button>
+    <button type="button" onclick="closePopupForm()">Cancel</button>
+  </form>
+</div>
+
+<script>
+  function openPopupForm(action) {
+    var formTitle = (action === 'edit') ? 'Edit Employee Details' : 'Delete Employee';
+    document.getElementById("formTitle").innerHTML = formTitle;
+
+    document.getElementById("popupForm").style.display = "block";
+  }
+
+  function closePopupForm() {
+    document.getElementById("popupForm").style.display = "none";
+  }
+</script>
+
+</body>
+</html>
