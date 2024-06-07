@@ -5,75 +5,74 @@ import SelectComponent from '../InputesFields/SelectComponent';
 import MultiSelectComponent from '../InputesFields/MultiSelectComponent';
 
 const json181 = {
-  header: {
-    name: "",
-    hobbies: [],
-    ticketType:""
+  "header": {
+    "name": "",
+    "hobbies": [],
+    "ticketType": ""
   },
-  Profile: {
-    abc: "",
-    keyData: {
-      IND_NPI: "",
-      ORG_NPI: "",
-      TIN: "",
-      ZIP: "",
-      SPECIALITY_CODE: "",
-      typeCode: "",
-      LOB: []
+  "Profile": {
+    "abc": "",
+    "keyData": {
+      "IND_NPI": "",
+      "ORG_NPI": "",
+      "TIN": "",
+      "ZIP": "",
+      "SPECIALITY_CODE": "",
+      "typeCode": "",
+      "LOB": []
     }
   },
-  providerAddress: [
+  "providerAddress": [
     {
-      address: {
-        id: ""
-      },
-      keyData: {
-        typeCode: "",
-        addressLine1: "",
-        zipCode: ""
+      "address": {
+        "id": "",
+        "keyData": {
+          "typeCode": "",
+          "addressLine1": "",
+          "zipCode": ""
+        }
       }
     }
   ]
 };
+
 
 const json182 = {
-  header: {
-    name: "",
-    hobbies: [],
-    ticketType:""
+  "header": {
+    "name": "",
+    "hobbies": [],
+    "ticketType": ""
   },
-  Profile: {
-    abc: "",
-    keyData: {
-      IND_NPI: "",
-      ORG_NPI: "",
-      TIN: "",
-      ZIP: "",
-      SPECIALITY_CODE: "",
-      typeCode: "",
-      LOB: []
+  "Profile": {
+    "abc": "",
+    "keyData": {
+      "IND_NPI": "",
+      "ORG_NPI": "",
+      "TIN": "",
+      "ZIP": "",
+      "SPECIALITY_CODE": "",
+      "typeCode": "",
+      "LOB": []
     }
   },
-  providerAddress: [
+  "providerAddress": [
     {
-      address: {
-        action: ""
-      },
-      keyData: {
-        typeCode: "",
-        addressLine1: "",
-        zipCode: "",
-        state: ""
+      "address": {
+        "id": "",
+        "keyData": {
+          "typeCode": "",
+          "addressLine1": "",
+          "zipCode": ""
+        }
       }
     }
   ]
 };
 
-const Data = () => {
 
+const Data = () => {
   const [formData, setFormData] = useState(json181);
 
-  // Handle changes for the TypeCode select
   const handleTypeCodeChange = (e) => {
     const { value } = e.target;
 
@@ -99,7 +98,6 @@ const Data = () => {
   };
 
 
-
   const handleTransactionTypeChange = (e) => {
     const { value } = e.target;
     setFormData((prevState) => ({
@@ -111,13 +109,54 @@ const Data = () => {
     }));
   };
 
+
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+
+  //   setFormData((prevState) => {
+  //     const newState = { ...prevState };
+  //     const keys = name.split('.');
+  //     let current = newState;
+  //     keys.forEach((key, index) => {
+  //       if (index === keys.length - 1) {
+  //         current[key] = value;
+  //       } else {
+  //         current = current[key];
+  //       }
+  //     });
+
+  //     return newState;
+  //   });
+  // };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-
+  
     setFormData((prevState) => {
       const newState = { ...prevState };
       const keys = name.split('.');
       let current = newState;
+  
+      // Check if the field is zipCode under providerAddress
+      if (keys.length === 4 && keys[0] === 'providerAddress' && keys[2] === 'keyData' && keys[3] === 'zipCode') {
+        return {
+          ...newState,
+          providerAddress: [
+            {
+              ...newState.providerAddress[0],
+              address: {
+                ...newState.providerAddress[0].address,
+                keyData: {
+                  ...newState.providerAddress[0].address.keyData,
+                  zipCode: value,
+                },
+              },
+            },
+          ],
+        };
+      }
+  
+      // Update the state for other fields
       keys.forEach((key, index) => {
         if (index === keys.length - 1) {
           current[key] = value;
@@ -125,12 +164,26 @@ const Data = () => {
           current = current[key];
         }
       });
-
+  
       return newState;
     });
   };
 
-
+  const handleZipCodeChange = (e) => {
+    const { value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      providerAddress: [
+        {
+          ...prevState.providerAddress[0],
+          address: {
+            ...prevState.providerAddress[0].address.keyData,
+            zipCode: value,
+          },
+        },
+      ],
+    }));
+  };
   
 
   const handleMultiSelectChange = (e) => {
@@ -165,8 +218,8 @@ const Data = () => {
       <SelectComponent
           label="Transaction Type"
           name="header.ticketType"
-          value={formData.header.ticketType}
-          onChange={handleChange}
+          value={formData.header.ticketType || ''}
+          onChange={handleTransactionTypeChange}
           options={transactionTypeOptions}
         />
 
@@ -196,12 +249,12 @@ const Data = () => {
           value={formData.Profile.keyData.TIN || ''}
           onChange={handleChange}
         />
-        <TextFieldComponent
+        {/* <TextFieldComponent
           label="ZIP"
           name="Profile.keyData.ZIP"
           value={formData.Profile.keyData.ZIP || ''}
           onChange={handleChange}
-        />
+        /> */}
         <TextFieldComponent
           label="SPECIALITY_CODE"
           name="Profile.keyData.SPECIALITY_CODE"
@@ -221,26 +274,26 @@ const Data = () => {
           value={formData.providerAddress[0].address.id || ''}
           onChange={handleChange}
         />
-        <TextFieldComponent
+        {/* <TextFieldComponent
           label="Address Line 1"
           name="providerAddress.0.keyData.addressLine1"
-          value={formData.providerAddress[0].keyData.addressLine1 || ''}
+          value={formData.providerAddress[0].address.keyData.addressLine1 || ''}
           onChange={handleChange}
-        />
+        /> */}
         <TextFieldComponent
           label="ZIP Code"
           name="providerAddress.0.keyData.zipCode"
-          value={formData.providerAddress[0].keyData.zipCode || ''}
+          value={formData.providerAddress[0].address.keyData.zipCode || ''}
           onChange={handleChange}
         />
-        {formData.providerAddress[0].keyData.state !== undefined && (
+        {/* {formData.providerAddress[0].keyData.state !== undefined && (
           <TextFieldComponent
             label="State"
             name="providerAddress.0.keyData.state"
             value={formData.providerAddress[0].keyData.state || ''}
             onChange={handleChange}
           />
-        )}
+        )} */}
         <button type="submit">Submit</button>
       </form>
       <h2>Generated JSON:</h2>
