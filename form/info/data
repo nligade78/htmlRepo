@@ -1,0 +1,252 @@
+import React, { useState } from 'react';
+import {  lobOptions, transactionTypeOptions, typeCodeOptions } from './options';
+import TextFieldComponent from '../InputesFields/TextFieldComponent';
+import SelectComponent from '../InputesFields/SelectComponent';
+import MultiSelectComponent from '../InputesFields/MultiSelectComponent';
+
+const json181 = {
+  header: {
+    name: "",
+    hobbies: [],
+    ticketType:""
+  },
+  Profile: {
+    abc: "",
+    keyData: {
+      IND_NPI: "",
+      ORG_NPI: "",
+      TIN: "",
+      ZIP: "",
+      SPECIALITY_CODE: "",
+      typeCode: "",
+      LOB: []
+    }
+  },
+  providerAddress: [
+    {
+      address: {
+        id: ""
+      },
+      keyData: {
+        typeCode: "",
+        addressLine1: "",
+        zipCode: ""
+      }
+    }
+  ]
+};
+
+const json182 = {
+  header: {
+    name: "",
+    hobbies: [],
+    ticketType:""
+  },
+  Profile: {
+    abc: "",
+    keyData: {
+      IND_NPI: "",
+      ORG_NPI: "",
+      TIN: "",
+      ZIP: "",
+      SPECIALITY_CODE: "",
+      typeCode: "",
+      LOB: []
+    }
+  },
+  providerAddress: [
+    {
+      address: {
+        action: ""
+      },
+      keyData: {
+        typeCode: "",
+        addressLine1: "",
+        zipCode: "",
+        state: ""
+      }
+    }
+  ]
+};
+
+const Data = () => {
+
+  const [formData, setFormData] = useState(json181);
+
+  // Handle changes for the TypeCode select
+  const handleTypeCodeChange = (e) => {
+    const { value } = e.target;
+
+    if (value === "181") {
+      setFormData((prevState) => ({
+        ...prevState,
+        Profile: {
+          ...json181.Profile,
+          keyData: { ...json181.Profile.keyData, typeCode: "181" }
+        },
+        providerAddress: json181.providerAddress,
+      }));
+    } else if (value === "182") {
+      setFormData((prevState) => ({
+        ...prevState,
+        Profile: {
+          ...json182.Profile,
+          keyData: { ...json182.Profile.keyData, typeCode: "182" }
+        },
+        providerAddress: json182.providerAddress,
+      }));
+    }
+  };
+
+
+
+  const handleTransactionTypeChange = (e) => {
+    const { value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      header: {
+        ...prevState.header,
+        ticketType: value,
+      },
+    }));
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prevState) => {
+      const newState = { ...prevState };
+      const keys = name.split('.');
+      let current = newState;
+      keys.forEach((key, index) => {
+        if (index === keys.length - 1) {
+          current[key] = value;
+        } else {
+          current = current[key];
+        }
+      });
+
+      return newState;
+    });
+  };
+
+
+  
+
+  const handleMultiSelectChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevState) => {
+      const newState = { ...prevState };
+      let current = newState;
+
+      const keys = name.split('.');
+      keys.forEach((key, index) => {
+        if (index === keys.length - 1) {
+          current[key] = typeof value === 'string' ? value.split(',') : value;
+        } else {
+          current = current[key];
+        }
+      });
+
+      return newState;
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Submitted JSON:', formData);
+  };
+
+  return (
+    <div>
+      <h1>Dynamic JSON Form</h1>
+      <form onSubmit={handleSubmit}>
+
+      <SelectComponent
+          label="Transaction Type"
+          name="header.ticketType"
+          value={formData.header.ticketType}
+          onChange={handleChange}
+          options={transactionTypeOptions}
+        />
+
+        <SelectComponent
+          label="Provider Type" 
+          name="Profile.keyData.typeCode"
+          value={formData.Profile.keyData.typeCode || ''}
+          onChange={handleTypeCodeChange}
+          options={typeCodeOptions}
+        />
+         
+        <TextFieldComponent
+          label="IND_NPI"
+          name="Profile.keyData.IND_NPI"
+          value={formData.Profile.keyData.IND_NPI || ''}
+          onChange={handleChange}
+        />
+        <TextFieldComponent
+          label="ORG_NPI"
+          name="Profile.keyData.ORG_NPI"
+          value={formData.Profile.keyData.ORG_NPI || ''}
+          onChange={handleChange}
+        />
+        <TextFieldComponent
+          label="TIN"
+          name="Profile.keyData.TIN"
+          value={formData.Profile.keyData.TIN || ''}
+          onChange={handleChange}
+        />
+        <TextFieldComponent
+          label="ZIP"
+          name="Profile.keyData.ZIP"
+          value={formData.Profile.keyData.ZIP || ''}
+          onChange={handleChange}
+        />
+        <TextFieldComponent
+          label="SPECIALITY_CODE"
+          name="Profile.keyData.SPECIALITY_CODE"
+          value={formData.Profile.keyData.SPECIALITY_CODE || ''}
+          onChange={handleChange}
+        />
+        <MultiSelectComponent
+          label="LOB"
+          name="Profile.keyData.LOB"
+          value={formData.Profile.keyData.LOB || []}
+          onChange={handleMultiSelectChange}
+          options={lobOptions}
+        />
+        <TextFieldComponent
+          label="Address ID"
+          name="providerAddress.0.address.id"
+          value={formData.providerAddress[0].address.id || ''}
+          onChange={handleChange}
+        />
+        <TextFieldComponent
+          label="Address Line 1"
+          name="providerAddress.0.keyData.addressLine1"
+          value={formData.providerAddress[0].keyData.addressLine1 || ''}
+          onChange={handleChange}
+        />
+        <TextFieldComponent
+          label="ZIP Code"
+          name="providerAddress.0.keyData.zipCode"
+          value={formData.providerAddress[0].keyData.zipCode || ''}
+          onChange={handleChange}
+        />
+        {formData.providerAddress[0].keyData.state !== undefined && (
+          <TextFieldComponent
+            label="State"
+            name="providerAddress.0.keyData.state"
+            value={formData.providerAddress[0].keyData.state || ''}
+            onChange={handleChange}
+          />
+        )}
+        <button type="submit">Submit</button>
+      </form>
+      <h2>Generated JSON:</h2>
+      <pre>{JSON.stringify(formData, null, 2)}</pre>
+    </div>
+  );
+};
+
+export default Data;
