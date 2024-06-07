@@ -1,0 +1,39 @@
+ const handleChange = (e) => {
+    const { name, value } = e.target;
+  
+    setFormData((prevState) => {
+      const newState = { ...prevState };
+      const keys = name.split('.');
+      let current = newState;
+  
+      // Check if the field is zipCode under providerAddress
+      if (keys.length === 4 && keys[0] === 'providerAddress' && keys[2] === 'keyData' && keys[3] === 'zipCode') {
+        return {
+          ...newState,
+          providerAddress: [
+            {
+              ...newState.providerAddress[0],
+              address: {
+                ...newState.providerAddress[0].address,
+                keyData: {
+                  ...newState.providerAddress[0].address.keyData,
+                  zipCode: value,
+                },
+              },
+            },
+          ],
+        };
+      }
+  
+      // Update the state for other fields
+      keys.forEach((key, index) => {
+        if (index === keys.length - 1) {
+          current[key] = value;
+        } else {
+          current = current[key];
+        }
+      });
+  
+      return newState;
+    });
+  };
