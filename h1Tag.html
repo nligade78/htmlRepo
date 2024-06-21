@@ -1,17 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>H Tag Info</title>
-</head>
-<body>
-    <h1>h1 : Typically, larger and bold, around 24px to 36px or even larger</h1>
-    <h2>h2 : Slightly smaller, around 18px to 30px</h2>
-    <h3>h3 : Smller than h2, around 16px to 24px</h3>
-    <h4>h4 : Generally, around 14px to 20px</h4>
-    <h5>h5 : Smaller, often around 12px to 18px</h5>
-    <h6>h6 : The smallest, often around 10px to 16px</h6>
-    
-</body>
-</html>
+// Import necessary dependencies
+import React from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography
+} from '@mui/material';
+
+// Sample JSON data
+const jsonData = {
+  "releatedProviderAdditionalDetails": {
+    "confidenceScore": {
+      "AZCAREPP001": {
+        "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228],
+        "confidenceScoreOfNetwork": "94.44%",
+        "countOfPOA_KEYs": 9
+      },
+      "AZCAREPP002": {
+        "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210],
+        "confidenceScoreOfNetwork": "94.44%",
+        "countOfPOA_KEYs": 10
+      },
+      "AZCAREPP003": {
+        "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210, 6001549211],
+        "confidenceScoreOfNetwork": "94.44%",
+        "countOfPOA_KEYs": 11
+      }
+    }
+  }
+};
+
+const DynamicTable = ({ data }) => {
+  const networks = Object.keys(data.releatedProviderAdditionalDetails.confidenceScore);
+  const allPOAKeys = new Set();
+
+  // Collect all POA_KEYs
+  networks.forEach(network => {
+    data.releatedProviderAdditionalDetails.confidenceScore[network].POA_KEYs.forEach(key => allPOAKeys.add(key));
+  });
+
+  const sortedPOAKeys = Array.from(allPOAKeys).sort((a, b) => a - b);
+
+  const isCommonKey = (key) => {
+    return networks.every(network => data.releatedProviderAdditionalDetails.confidenceScore[network].POA_KEYs.includes(key));
+  };
+
+  return (
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell><strong>POA_KEYs</strong></TableCell>
+            {networks.map(network => <TableCell key={network}><strong>{network}</strong></TableCell>)}
+            <TableCell><strong>Common POA_KEY</strong></TableCell>
+            <TableCell><strong>Confidence Score</strong></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {sortedPOAKeys.map(key => (
+            <TableRow key={key}>
+              <TableCell>{key}</TableCell>
+              {networks.map(network => (
+                <TableCell key={network}>
+                  {data.releatedProviderAdditionalDetails.confidenceScore[network].POA_KEYs.includes(key) ? 'Y' : 'N'}
+                </TableCell>
+              ))}
+              <TableCell>{isCommonKey(key) ? 'Y' : 'N'}</TableCell>
+              <TableCell>
+                {networks.map(network => (
+                  <Typography key={`${network}-score`}>
+                    {data.releatedProviderAdditionalDetails.confidenceScore[network].confidenceScoreOfNetwork}
+                  </Typography>
+                ))}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
+
+const App = () => <DynamicTable data={jsonData} />;
+
+export default App;
