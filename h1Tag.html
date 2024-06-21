@@ -1,5 +1,4 @@
-// Import necessary dependencies
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -8,6 +7,8 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Checkbox,
+  FormControlLabel,
   Typography
 } from '@mui/material';
 
@@ -35,6 +36,8 @@ const jsonData = {
 };
 
 const DynamicTable = ({ data }) => {
+  const [hiddenColumns, setHiddenColumns] = useState({});
+
   const networks = Object.keys(data.releatedProviderAdditionalDetails.confidenceScore);
   const allPOAKeys = new Set();
 
@@ -45,43 +48,75 @@ const DynamicTable = ({ data }) => {
 
   const sortedPOAKeys = Array.from(allPOAKeys).sort((a, b) => a - b);
 
+  // Check if a POA_KEY is present in all networks
   const isCommonKey = (key) => {
     return networks.every(network => data.releatedProviderAdditionalDetails.confidenceScore[network].POA_KEYs.includes(key));
   };
 
+  // Toggle hidden columns
+  const toggleColumn = (column) => {
+    setHiddenColumns((prevHidden) => ({
+      ...prevHidden,
+      [column]: !prevHidden[column]
+    }));
+  };
+
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell><strong>POA_KEYs</strong></TableCell>
-            {networks.map(network => <TableCell key={network}><strong>{network}</strong></TableCell>)}
-            <TableCell><strong>Common POA_KEY</strong></TableCell>
-            <TableCell><strong>Confidence Score</strong></TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sortedPOAKeys.map(key => (
-            <TableRow key={key}>
-              <TableCell>{key}</TableCell>
+    <>
+      <div style={{ marginBottom: '20px' }}>
+        {networks.map(network => (
+          <FormControlLabel
+            key={network}
+            control={
+              <Checkbox
+                checked={!hiddenColumns[network]}
+                onChange={() => toggleColumn(network)}
+              />
+            }
+            label={`Show ${network}`}
+          />
+        ))}
+      </div>
+
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell><strong>POA_KEYs</strong></TableCell>
               {networks.map(network => (
-                <TableCell key={network}>
-                  {data.releatedProviderAdditionalDetails.confidenceScore[network].POA_KEYs.includes(key) ? 'Y' : 'N'}
-                </TableCell>
+                !hiddenColumns[network] && <TableCell key={network}><strong>{network}</strong></TableCell>
               ))}
-              <TableCell>{isCommonKey(key) ? 'Y' : 'N'}</TableCell>
-              <TableCell>
-                {networks.map(network => (
-                  <Typography key={`${network}-score`}>
-                    {data.releatedProviderAdditionalDetails.confidenceScore[network].confidenceScoreOfNetwork}
-                  </Typography>
-                ))}
-              </TableCell>
+              <TableCell><strong>Common POA_KEY</strong></TableCell>
+              <TableCell><strong>Confidence Scores</strong></TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {sortedPOAKeys.map(key => (
+              <TableRow key={key}>
+                <TableCell>{key}</TableCell>
+                {networks.map(network => (
+                  !hiddenColumns[network] && (
+                    <TableCell key={network}>
+                      {data.releatedProviderAdditionalDetails.confidenceScore[network].POA_KEYs.includes(key) ? 'Y' : 'N'}
+                    </TableCell>
+                  )
+                ))}
+                <TableCell>{isCommonKey(key) ? 'Y' : 'N'}</TableCell>
+                <TableCell>
+                  {networks.map(network => (
+                    !hiddenColumns[network] && (
+                      <Typography key={`${network}-score`}>
+                        {data.releatedProviderAdditionalDetails.confidenceScore[network].confidenceScoreOfNetwork}
+                      </Typography>
+                    )
+                  ))}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
   );
 };
 
