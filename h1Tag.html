@@ -1,3 +1,4 @@
+// Import necessary dependencies
 import React, { useState } from 'react';
 import {
   Table,
@@ -29,6 +30,21 @@ const jsonData = {
         "countOfPOA_KEYs": 10
       },
       "Network3": {
+        "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210, 6001549211],
+        "confidenceScoreOfNetwork": "94.44%",
+        "countOfPOA_KEYs": 11
+      },
+      "Network4": {
+        "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210, 6001549211],
+        "confidenceScoreOfNetwork": "94.44%",
+        "countOfPOA_KEYs": 11
+      },
+      "XYZ": {
+        "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210, 6001549211],
+        "confidenceScoreOfNetwork": "94.44%",
+        "countOfPOA_KEYs": 11
+      },
+      "PQR": {
         "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210, 6001549211],
         "confidenceScoreOfNetwork": "94.44%",
         "countOfPOA_KEYs": 11
@@ -107,14 +123,24 @@ const DynamicTable = ({ data }) => {
   // Extract average confidence score
   const averageConfidenceScore = confidenceScores.avarageOfConfidenceScore;
 
-  // Filter POA_KEYs based on search query
-  const filteredKeys = sortedKeys.filter(key => key.toString().includes(searchQuery));
+  // Filter POA_KEYs based on search query across all columns
+  const filteredKeys = sortedKeys.filter(key => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      key.toString().includes(searchLower) ||
+      networks.some(network =>
+        confidenceScores[network].POA_KEYs.includes(key) ||
+        network.toLowerCase().includes(searchLower) ||
+        confidenceScores[network].confidenceScoreOfNetwork.toLowerCase().includes(searchLower)
+      )
+    );
+  });
 
   return (
     <Paper>
       <Box display="flex" justifyContent="flex-end" padding={2}>
         <TextField
-          label="Search POA_KEY"
+          label="Search"
           variant="outlined"
           size="small"
           value={searchQuery}
