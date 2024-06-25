@@ -1,4 +1,4 @@
-// Import necessary dependencies
+
 import React, { useState } from 'react';
 import {
   Table,
@@ -43,6 +43,26 @@ const jsonData = {
       "confidenceScoreOfNetwork": "94.44%",
       "countOfPOA_KEYs": 11
     },
+    "ABCNetwork": {
+      "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228],
+      "confidenceScoreOfNetwork": "94.44%",
+      "countOfPOA_KEYs": 9
+    },
+    "DEFNetwork": {
+      "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210],
+      "confidenceScoreOfNetwork": "94.44%",
+      "countOfPOA_KEYs": 10
+    },
+    "GNetwork": {
+      "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210, 6001549211],
+      "confidenceScoreOfNetwork": "94.44%",
+      "countOfPOA_KEYs": 11
+    },
+    "HNetwork": {
+      "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210, 6001549211],
+      "confidenceScoreOfNetwork": "94.44%",
+      "countOfPOA_KEYs": 11
+    },
     "avarageOfConfidenceScore": "85%",
     "countOfUniquePOA_Keys": 4,
     "uniquePOAKeys": [
@@ -57,13 +77,6 @@ const jsonData = {
 const DynamicTable = ({ data }) => {
   const confidenceScores = data.confidenceScore;
   const networks = Object.keys(confidenceScores).filter(key => typeof confidenceScores[key] === 'object' && confidenceScores[key].POA_KEYs);
-
-  // Collect and sort all POA_KEYs
-  const allPOAKeys = new Set();
-  networks.forEach(network => {
-    confidenceScores[network].POA_KEYs.forEach(key => allPOAKeys.add(key));
-  });
-  const sortedPOAKeys = Array.from(allPOAKeys).sort((a, b) => a - b);
 
   // State for pagination, sorting, and search
   const [page, setPage] = useState(0);
@@ -98,36 +111,18 @@ const DynamicTable = ({ data }) => {
     return stabilizedThis.map((el) => el[0]);
   };
 
-  const getComparator = (order, orderBy) => {
-    return order === 'desc'
-      ? (a, b) => descendingComparator(a, b, orderBy)
-      : (a, b) => -descendingComparator(a, b, orderBy);
-  };
-
-  const descendingComparator = (a, b, orderBy) => {
-    if (orderBy === 'POA_KEY') {
-      return a - b;
-    }
-    return 0;
-  };
-
-  const sortedKeys = handleSort(sortedPOAKeys, getComparator(order, orderBy));
-
   // Extract average confidence score
   const averageConfidenceScore = confidenceScores.avarageOfConfidenceScore;
 
-  // Filter POA_KEYs based on search query across all columns
-  const filteredKeys = sortedKeys.filter(key => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      key.toString().includes(searchLower) ||
-      networks.some(network =>
-        confidenceScores[network].POA_KEYs.includes(key) ||
-        network.toLowerCase().includes(searchLower) ||
-        confidenceScores[network].confidenceScoreOfNetwork.toLowerCase().includes(searchLower)
-      )
-    );
+  // Collect and sort all POA_KEYs
+  const allPOAKeys = new Set();
+  networks.forEach(network => {
+    confidenceScores[network].POA_KEYs.forEach(key => allPOAKeys.add(key));
   });
+  const sortedPOAKeys = Array.from(allPOAKeys).sort((a, b) => a - b);
+
+  const filteredKeys = sortedPOAKeys.filter(key => key.toString().includes(searchQuery));
+
 
   return (
     <Paper>
@@ -158,28 +153,41 @@ const DynamicTable = ({ data }) => {
                 </TableSortLabel>
               </TableCell>
               {networks.map(network => (
-                <TableCell key={network}><strong>{network}</strong></TableCell>
+                <TableCell key={network}>
+                  <strong>{network}</strong>
+                </TableCell>
               ))}
-              <TableCell><strong>Average Confidence Score</strong></TableCell>
+              <TableCell>
+                <Typography><strong>Average Confidence Score: {averageConfidenceScore}</strong></Typography>
+              </TableCell>
             </TableRow>
+            {/* Additional row for confidence scores */}
             <TableRow>
-              <TableCell><strong>Confidence Score</strong></TableCell>
+              <TableCell>
+                <strong>Confidence Score</strong>
+              </TableCell>
               {networks.map(network => (
                 <TableCell key={network}>
                   <Typography>{confidenceScores[network].confidenceScoreOfNetwork}</Typography>
                 </TableCell>
               ))}
-              <TableCell rowSpan={rowsPerPage + 1} align="center">
+              <TableCell>
                 <Typography>{averageConfidenceScore}</Typography>
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredKeys.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(key => (
+            {handleSort(filteredKeys.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage), (a, b) => {
+              if (order === 'asc') {
+                return a - b;
+              } else {
+                return b - a;
+              }
+            }).map(key => (
               <TableRow key={key}>
                 <TableCell>{key}</TableCell>
                 {networks.map(network => (
-                  <TableCell key={network}>
+                  <TableCell key={`${network}-${key}`}>
                     {confidenceScores[network].POA_KEYs.includes(key) ? 'Y' : 'N'}
                   </TableCell>
                 ))}
@@ -201,6 +209,6 @@ const DynamicTable = ({ data }) => {
   );
 };
 
-const App = () => <DynamicTable data={jsonData} />;
-
-export default App;
+export default function App() {
+  return <DynamicTable data={jsonData} />;
+}
