@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Table,
@@ -15,68 +14,70 @@ import {
   TextField
 } from '@mui/material';
 
-// Sample JSON data
+// Updated JSON data
 const jsonData = {
   "confidenceScore": {
     "TNCAREPPO001": {
-      "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228],
-      "confidenceScoreOfNetwork": "94.44%",
-      "countOfPOA_KEYs": 9
+      "POA_KEYs": [
+        1000141337,
+        6001405303,
+        6003999041,
+        6004155852
+      ],
+      "confidenceScoreOfNetwork": "100.00%",
+      "countOfPOA_KEYs": 4
     },
     "TNNTWCLA001": {
-      "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210],
-      "confidenceScoreOfNetwork": "94.44%",
-      "countOfPOA_KEYs": 10
+      "POA_KEYs": [
+        1000141337,
+        6001405303,
+        6003999041,
+        6004155852
+      ],
+      "confidenceScoreOfNetwork": "100.00%",
+      "countOfPOA_KEYs": 4
     },
     "TNNTWKFDSNP1": {
-      "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210, 6001549211],
-      "confidenceScoreOfNetwork": "94.44%",
-      "countOfPOA_KEYs": 11
+      "POA_KEYs": [
+        1000141337,
+        6001405303,
+        6003999041,
+        6004155852
+      ],
+      "confidenceScoreOfNetwork": "100.00%",
+      "countOfPOA_KEYs": 4
     },
     "TNNTWKISNP01": {
-      "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210, 6001549211],
-      "confidenceScoreOfNetwork": "94.44%",
-      "countOfPOA_KEYs": 11
+      "POA_KEYs": [
+        6004155852
+      ],
+      "confidenceScoreOfNetwork": "25.00%",
+      "countOfPOA_KEYs": 1
     },
     "TNNTWKSNP001": {
-      "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210, 6001549211],
+      "POA_KEYs": [
+        1000141337,
+        6001405303,
+        6003999041,
+        6004155852
+      ],
       "confidenceScoreOfNetwork": "94.44%",
       "countOfPOA_KEYs": 11
     },
-    "ABCNetwork": {
-      "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228],
-      "confidenceScoreOfNetwork": "94.44%",
-      "countOfPOA_KEYs": 9
-    },
-    "DEFNetwork": {
-      "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210],
-      "confidenceScoreOfNetwork": "94.44%",
-      "countOfPOA_KEYs": 10
-    },
-    "GNetwork": {
-      "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210, 6001549211],
-      "confidenceScoreOfNetwork": "94.44%",
-      "countOfPOA_KEYs": 11
-    },
-    "HNetwork": {
-      "POA_KEYs": [6001549220, 6001549221, 6001549222, 6001549223, 6001549224, 6001549225, 6001549226, 6001549227, 6001549228, 6001549229, 6001549210, 6001549211],
-      "confidenceScoreOfNetwork": "94.44%",
-      "countOfPOA_KEYs": 11
-    },
-    "avarageOfConfidenceScore": "85%",
+    "averageOfConfidenceScore": "85.00%",
     "countOfUniquePOA_Keys": 4,
     "uniquePOAKeys": [
-      10000023029,
-      10000023028,
-      10000023024,
-      10000023023
+      1000141337,
+      6001405030,
+      6003999041,
+      6004155852
     ]
   }
 };
 
 const DynamicTable = ({ data }) => {
   const confidenceScores = data.confidenceScore;
-  const networks = Object.keys(confidenceScores).filter(key => typeof confidenceScores[key] === 'object' && confidenceScores[key].POA_KEYs);
+  const networks = Object.keys(confidenceScores).filter(key => key !== 'averageOfConfidenceScore' && key !== 'countOfUniquePOA_Keys' && key !== 'uniquePOAKeys');
 
   // State for pagination, sorting, and search
   const [page, setPage] = useState(0);
@@ -112,7 +113,7 @@ const DynamicTable = ({ data }) => {
   };
 
   // Extract average confidence score
-  const averageConfidenceScore = confidenceScores.avarageOfConfidenceScore;
+  const averageConfidenceScore = confidenceScores.averageOfConfidenceScore;
 
   // Collect and sort all POA_KEYs
   const allPOAKeys = new Set();
@@ -121,8 +122,16 @@ const DynamicTable = ({ data }) => {
   });
   const sortedPOAKeys = Array.from(allPOAKeys).sort((a, b) => a - b);
 
-  const filteredKeys = sortedPOAKeys.filter(key => key.toString().includes(searchQuery));
-
+  // Filter POA_KEYs based on search query across all columns
+  const filteredKeys = sortedPOAKeys.filter(key => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      key.toString().includes(searchLower) ||
+      networks.some(network =>
+        confidenceScores[network].POA_KEYs.includes(key)
+      )
+    );
+  });
 
   return (
     <Paper>
