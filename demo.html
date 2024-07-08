@@ -1,0 +1,211 @@
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { saveAs } from 'file-saver';
+
+const networks = [
+  {
+    "action": "ADD",
+    "comments": "",
+    "keyData": {
+      "networkId": "ABCDXYA",
+      "lob": "8008",
+      "confidenceScore": "1.00"
+    },
+    "sourceCode": "",
+    "sourceCodeText": "",
+    "contractedState": "TN",
+    "status": {
+      "effectiveDate": "",
+      "terminationDate": "9999-12-31"
+    }
+  },
+  {
+    "action": "ADD",
+    "comments": "",
+    "keyData": {
+      "networkId": "ABCDXYA",
+      "lob": "8008",
+      "confidenceScore": "1.00"
+    },
+    "sourceCode": "",
+    "sourceCodeText": "",
+    "contractedState": "TN",
+    "status": {
+      "effectiveDate": "",
+      "terminationDate": "9999-12-31"
+    }
+  },
+  {
+    "action": "ADD",
+    "comments": "",
+    "keyData": {
+      "networkId": "ABCDXYA",
+      "lob": "8008",
+      "confidenceScore": "1.00"
+    },
+    "sourceCode": "",
+    "sourceCodeText": "",
+    "contractedState": "TN",
+    "status": {
+      "effectiveDate": "",
+      "terminationDate": "9999-12-31"
+    }
+  },
+  {
+    "action": "ADD",
+    "comments": "",
+    "keyData": {
+      "networkId": "ABCDXYA",
+      "lob": "8008",
+      "confidenceScore": "1.00"
+    },
+    "sourceCode": "",
+    "sourceCodeText": "",
+    "contractedState": "TN",
+    "status": {
+      "effectiveDate": "",
+      "terminationDate": "9999-12-31"
+    }
+  },
+  {
+    "action": "ADD",
+    "comments": "",
+    "keyData": {
+      "networkId": "ABCDXYA",
+      "lob": "8008",
+      "confidenceScore": "1.00"
+    },
+    "sourceCode": "",
+    "sourceCodeText": "",
+    "contractedState": "TN",
+    "status": {
+      "effectiveDate": "",
+      "terminationDate": "9999-12-31"
+    }
+  },
+  {
+    "action": "ADD",
+    "comments": "",
+    "keyData": {
+      "networkId": "ABCDXYA",
+      "lob": "8008",
+      "confidenceScore": "1.00"
+    },
+    "sourceCode": "",
+    "sourceCodeText": "",
+    "contractedState": "TN",
+    "status": {
+      "effectiveDate": "",
+      "terminationDate": "9999-12-31"
+    }
+  },
+  {
+    "action": "ADD",
+    "comments": "",
+    "keyData": {
+      "networkId": "ABCDXYA",
+      "lob": "8008",
+      "confidenceScore": "1.00"
+    },
+    "sourceCode": "",
+    "sourceCodeText": "",
+    "contractedState": "TN",
+    "status": {
+      "effectiveDate": "",
+      "terminationDate": "9999-12-31"
+    }
+  },
+  {
+    "action": "ADD",
+    "comments": "",
+    "keyData": {
+      "networkId": "ABCDXYA",
+      "lob": "8008",
+      "confidenceScore": "1.00"
+    },
+    "sourceCode": "",
+    "sourceCodeText": "",
+    "contractedState": "TN",
+    "status": {
+      "effectiveDate": "",
+      "terminationDate": "9999-12-31"
+    }
+  }
+  // Add more network objects as needed...
+];
+
+export default function QuickFilteringGrid() {
+  const rows = React.useMemo(
+    () => networks.map((network, index) => ({
+      id: index + 1,
+      action: network.action,
+      networkId: network.keyData?.networkId || '',
+      lob: network.keyData?.lob || '',
+      confidenceScore: network.keyData?.confidenceScore || '',
+      contractedState: network.contractedState || '',
+      terminationDate: network.status?.terminationDate || '',
+    })),
+    [networks]
+  );
+
+  const columns = React.useMemo(
+    () => [
+      { field: 'action', headerName: 'Action', width: 150 },
+      { field: 'networkId', headerName: 'Network ID', width: 150 },
+      { field: 'lob', headerName: 'LOB', width: 100 },
+      { field: 'confidenceScore', headerName: 'Confidence Score', width: 180 },
+      { field: 'contractedState', headerName: 'Contracted State', width: 180 },
+      { field: 'terminationDate', headerName: 'Termination Date', width: 200 },
+    ],
+    []
+  );
+
+  const handleExport = () => {
+    const csvContent = generateCSV(); // Generate CSV content here
+  
+    // Create a Blob object with the CSV content
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+  
+    // Use saveAs to trigger file download with the specified filename
+    saveAs(blob, 'NetworkData.csv');
+  };
+
+  const generateCSV = () => {
+    // Generate CSV content from rows and columns
+    const headers = columns.map(column => column.headerName).join(',') + '\n';
+    const rowsContent = rows.map(row =>
+      columns.map(column => row[column.field]).join(',')
+    ).join('\n');
+    return headers + rowsContent;
+  };
+
+  return (
+    <Box sx={{ height: 400, width: '100%' }}>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        pageSize={5}
+        rowsPerPageOptions={[5, 10, 20]}
+        checkboxSelection
+        // disableSelectionOnClick
+        // disableColumnFilter
+        // disableColumnSelector
+        // disableDensitySelector
+        slots={{ toolbar: GridToolbar }}
+        slotProps={{
+          toolbar: {
+            showQuickFilter: true,
+            // Add export button to the toolbar
+            buttons: [
+              {
+                icon: () => <button onClick={handleExport}>Export as CSV</button>,
+                label: 'Export',
+              },
+            ],
+          },
+        }}
+      />
+    </Box>
+  );
+}
