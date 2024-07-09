@@ -213,3 +213,41 @@ export default function QuickFilteringGrid() {
 
 
 npm install @mui/x-data-grid @emotion/react @emotion/styled
+
+
+window
+
+import ReactDOMServer from 'react-dom/server';
+
+const generateHtmlFile = (component) => {
+  const htmlString = `
+    <html>
+    <head>
+     
+    </head>
+    <body>
+      <div id="new-data-root">
+        ${ReactDOMServer.renderToString(component)}
+      </div>
+    </body>
+    </html>
+  `;
+  const blob = new Blob([htmlString], { type: 'text/html' });
+  return URL.createObjectURL(blob);
+};
+
+export default generateHtmlFile;
+
+
+const handleButtonClick = () => {
+  const htmlFileUrl = generateHtmlFile(<NewData />);
+  const newWindow = window.open(htmlFileUrl, '_blank');
+   
+  if (newWindow) {
+      // Wait for the new window/tab to load
+      newWindow.onload = () => {
+        newWindow.document.title = "New Data Page";
+        // Optionally set other properties here if needed
+      };
+    }
+};
