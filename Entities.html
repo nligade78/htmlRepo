@@ -1,15 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Html Entities</title>
-</head>
-<body>
-     <p>
-        &lt; : less than sign
-        &copy;
-        &reg;
-     </p>
-</body>
-</html>
+import React from 'react';
+import { DataGrid ,GridToolbar} from '@mui/x-data-grid';
+import { Box,Table,TableCell,Typography,TableBody,TableRow ,TableContainer} from '@mui/material';
+
+
+  const averageOfConfidenceScore = jsonData.confidenceScore.averageOfConfidenceScore;
+  console.log(averageOfConfidenceScore,"averageOfConfidenceScore")
+
+const processData = (data) => {
+  const networks = data.confidenceScore;
+  const uniquePOAKeys = new Set();
+  const networkNames = [];
+  const poaKeyCounts = {};
+
+  for (const network in networks) {
+    if (network !== "averageOfConfidenceScore" && network !== "countOfUniquePOA_Keys" && network !== "uniquePOAKeys") {
+      networkNames.push(network);
+      networks[network].POA_KEYs.forEach(poaKey => {
+        uniquePOAKeys.add(poaKey);
+        if (!poaKeyCounts[poaKey]) {
+          poaKeyCounts[poaKey] = 0;
+        }
+        poaKeyCounts[poaKey]++;
+      });
+    }
+  }
+
+  
+  const uniquePOAKeysArray = Array.from(uniquePOAKeys);
+  
+  const columnss = [
+    { field: '', headerName: 'averageOfConfidenceScore', width: 200 },
+  
+  ];
+
+  const columns = [
+   
+    { field: 'value', headerName: 'POA_KEY', width: 200 },
+    // { field: 'value', headerName: 'Value', width: 200 },
+    ...networkNames.map(network => ({ field: network, headerName: network, width: 200 })),
+    // { field: 'allCommon', headerName: 'All Common', width: 150 }
+  ];
+
+  const rows = [];
+
+  // Add confidence score row
+  rows.push({ id: 'confidenceScore', attribute: 'Confidence Score', value: 'Confidence Score' }); // Placeholder for confidence score
+
+  // Add POA_KEYs rows
+  uniquePOAKeysArray.forEach((poaKey, index) => {
+    const row = { id: index, attribute: 'POA_KEY', value: poaKey };
+    networkNames.forEach(network => {
+      row[network] = networks[network].POA_KEYs.includes(poaKey) ? 'Y' : 'N';
+    });
+    rows.push(row);
+  });
+
+  // Add confidence score of networks
+  networkNames.forEach(network => {
+    rows[0][network] = networks[network].confidenceScoreOfNetwork; // Populate confidence score for each network
+  });
+
+  // Add common POA_KEYs row
+//   const allPOAKeys = networkNames.map(network => new Set(networks[network].POA_KEYs));
+//   const commonPOAKeys = uniquePOAKeysArray.filter(poaKey => allPOAKeys.every(set => set.has(poaKey)));
+//   const allNetworksCommon = commonPOAKeys.length === uniquePOAKeysArray.length ? 'Y' : 'N';
+
+//   rows.push({ id: 'allCommon', attribute: 'All Common', value: allNetworksCommon });
+
+  return { columns, rows };
+};
+
+const DataGridComponent = () => {
+  const { columns, rows } = processData(jsonData);
+
+  return (
+    <Box sx={{ height: 400, width: '100%' }}>
+        
+      <DataGrid
+        rows={rows}
+        columns={columns}
+       
+        pageSize={5}
+        rowsPerPageOptions={[5]}
+        checkboxSelection
+        slots={{ toolbar: GridToolbar }}
+        slotProps={{
+          toolbar: {
+            showQuickFilter: true,
+          },
+        }}
+      />
+    </Box>
+  );
+};
+
+export default DataGridComponent;
