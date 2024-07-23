@@ -1,0 +1,284 @@
+
+import React, { useState } from 'react';
+import {
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableFooter, Paper, Button, TablePagination, TextField, TableSortLabel, Box
+} from '@mui/material';
+import * as XLSX from 'xlsx';
+const data = {
+  "totalNetworkCount": 5,
+  "network": [],
+  "weightedScore": {
+    "totalPOAKEYcount": 4,
+    "uniquePOAKEYs": [
+      2131231123,
+      1231231231,
+      1231431143,
+      5764563432
+    ],
+    "weightedScores": [
+      {
+        "networkID": "TNCAREPPO001",
+        "weightedScoresOfNetwork": 1,
+        "countOfPOAKEYs": 4,
+        "POAKEYs": [
+          1000141337,
+          6001405303,
+          6003999041,
+          6004155852
+        ]
+      },
+      {
+        "networkID": "TNCAREPPO002",
+        "weightedScoresOfNetwork": 1,
+        "countOfPOAKEYs": 5,
+        "POAKEYs": [
+          1000141337,
+          6001405303,
+          6003999041,
+          6004155852,
+          6004155854
+        ]
+      },
+      {
+        "networkID": "TNCAREPPO003",
+        "weightedScoresOfNetwork": 1.7,
+        "countOfPOAKEYs": 6,
+        "POAKEYs": [
+          1000141337,
+          6001405303,
+          6003999041,
+          6004155852,
+          6004155856,
+          6004155858
+        ]
+      },
+      {
+        "networkID": "TNCAREPPO004",
+        "weightedScoresOfNetwork": 1,
+        "countOfPOAKEYs": 7,
+        "POAKEYs": [
+          1000141337,
+          6001405303,
+          6003999041,
+          6004155852,
+          6004155856,
+          6004155858,
+          6004155857
+        ]
+      },
+      {
+        "networkID": "TNCAREPPO005",
+        "weightedScoresOfNetwork": 1.9,
+        "countOfPOAKEYs": 8,
+        "POAKEYs": [
+          1000141337,
+          6001405303,
+          6003999041,
+          6004155852,
+          6004155856,
+          6004155858,
+          6004155857,
+          6004155859
+        ]
+      }
+    ],
+    "average": [
+      {
+        "LOB": "8002",
+        "weightedScore": 0.85
+      },
+      {
+        "LOB": "8001",
+        "weightedScore": 0.85
+      },
+      {
+        "LOB": "8003",
+        "weightedScore": 0.82
+      }
+    ]
+  }
+};
+const extractUniquePOAKEYs = (data) => {
+  const allPOAKEYs = data.weightedScore.weightedScores.flatMap(score => score.POAKEYs);
+  return [...new Set(allPOAKEYs)];
+};
+const uniquePOAKEYs = extractUniquePOAKEYs(data);
+const exportToExcel = () => {
+  const workbook = XLSX.utils.book_new();
+  const worksheetData = [];
+  // Add headers
+  const headers = ['POA_KEY', ...data.weightedScore.weightedScores.map(item => item.networkID)];
+  worksheetData.push(headers);
+  // Add weightedScoresOfNetwork row
+  const weightedScoresOfNetworkRow = ['weightedScoresOfNetwork', ...data.weightedScore.weightedScores.map(item => item.weightedScoresOfNetwork)];
+  worksheetData.push(weightedScoresOfNetworkRow);
+  // Add data rows
+  uniquePOAKEYs.forEach(poaKey => {
+    const row = [poaKey];
+    data.weightedScore.weightedScores.forEach(item => {
+      row.push(item.POAKEYs.includes(poaKey) ? 'Y' : 'N');
+    });
+    worksheetData.push(row);
+  });
+  // Add LOB row
+  const lobRow = ['LOB', ...data.weightedScore.average.map(item => item.LOB)];
+  worksheetData.push(lobRow);
+  // Add average row
+  const averageRow = ['Average Score', ...data.weightedScore.average.map(item => item.weightedScore)];
+  worksheetData.push(averageRow);
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
+  XLSX.writeFile(workbook, 'networkData.xlsx');
+};
+const App = () => {
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [page, setPage] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState('POA_KEY');
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+  };
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+  const filteredRows = uniquePOAKEYs.filter((poaKey) =>
+    poaKey.toString().toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const sortedRows = filteredRows.sort((a, b) => {
+    if (orderBy === 'POA_KEY') {
+      return order === 'asc' ? a - b : b - a;
+    }
+    return 0;
+  });
+  const emptyRows = rowsPerPage - Math.min(rowsPerPage, sortedRows.length - page * rowsPerPage);
+  return (
+    <TableContainer component={Paper}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" padding={2}>
+        <Button onClick={exportToExcel} variant="contained" color="primary">
+          Export to Excel
+        </Button>
+        <TextField
+          variant="outlined"
+          size="small"
+          label="Search POA_KEY"
+          value={searchTerm}
+          onChange={handleSearch}
+        />
+      </Box>
+      <Table>
+        <TableHead>
+        <TableRow>
+            <TableCell>Average Score</TableCell>
+            {data.weightedScore.weightedScores.map((item, index) => (
+              <TableCell key={index}></TableCell>
+            ))}
+          </TableRow>
+          <TableRow>
+            <TableCell>LOB</TableCell>
+            {data.weightedScore.average.map((item, index) => (
+              <TableCell key={index}>
+                {item.LOB}
+              </TableCell>
+            ))}
+          </TableRow>
+          <TableRow>
+            <TableCell>Weighted Score</TableCell>
+            {data.weightedScore.average.map((item, index) => (
+              <TableCell key={index}>
+                {item.weightedScore}
+              </TableCell>
+            ))}
+          </TableRow>
+          <TableRow>
+            <TableCell></TableCell>
+            {data.weightedScore.weightedScores.map((item, index) => (
+              <TableCell key={index}></TableCell>
+            ))}
+          </TableRow>
+          
+          <TableRow>
+            <TableCell sortDirection={orderBy === 'POA_KEY' ? order : false}>
+              <TableSortLabel
+                active={orderBy === 'POA_KEY'}
+                direction={orderBy === 'POA_KEY' ? order : 'asc'}
+                onClick={() => handleRequestSort('POA_KEY')}
+              >
+                POA_KEY
+              </TableSortLabel>
+            </TableCell>
+            {data.weightedScore.weightedScores.map((item, index) => (
+              <TableCell key={index}>{item.networkID}</TableCell>
+            ))}
+          </TableRow>
+          <TableRow>
+            <TableCell>weightedScoresOfNetwork</TableCell>
+            {data.weightedScore.weightedScores.map((item, index) => (
+              <TableCell key={index}>{item.weightedScoresOfNetwork}</TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {sortedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((poaKey, rowIndex) => (
+            <TableRow key={rowIndex}>
+              <TableCell>{poaKey}</TableCell>
+              {data.weightedScore.weightedScores.map((item, colIndex) => (
+                <TableCell key={colIndex}>
+                  {item.POAKEYs.includes(poaKey) ? 'Y' : 'N'}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+          {emptyRows > 0 && (
+            <TableRow style={{ height: 53 * emptyRows }}>
+              <TableCell colSpan={6} />
+            </TableRow>
+          )}
+        </TableBody>
+        <TableFooter>
+          {/* <TableRow>
+            <TableCell>Average Score</TableCell>
+            {data.weightedScore.weightedScores.map((item, index) => (
+              <TableCell key={index}></TableCell>
+            ))}
+          </TableRow>
+          <TableRow>
+            <TableCell>LOB</TableCell>
+            {data.weightedScore.average.map((item, index) => (
+              <TableCell key={index}>
+                {item.LOB}
+              </TableCell>
+            ))}
+          </TableRow>
+          <TableRow>
+            <TableCell>Weighted Score</TableCell>
+            {data.weightedScore.average.map((item, index) => (
+              <TableCell key={index}>
+                {item.weightedScore}
+              </TableCell>
+            ))}
+          </TableRow> */}
+        </TableFooter>
+      </Table>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={sortedRows.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+    </TableContainer>
+  );
+};
+export default App;
