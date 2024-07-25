@@ -1,0 +1,96 @@
+// GetNetworkPage.js
+
+import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleDoubleLeft, faAngleDoubleRight, faHome, faUser, faCog } from '@fortawesome/free-solid-svg-icons'; // Import the icons
+import { DataGrid } from '@mui/x-data-grid'; // Import DataGrid from Material-UI
+
+import './GetNetworkPage.css';
+
+const GetNetworkPage = () => {
+  const [isMenuCollapsed, setMenuCollapsed] = useState(false);
+  const [isFormCollapsed, setFormCollapsed] = useState(false);
+
+  const toggleMenu = () => setMenuCollapsed(!isMenuCollapsed);
+  const toggleForm = () => setFormCollapsed(!isFormCollapsed);
+
+  const clearAll = () => {
+    // Clear all input fields logic
+    document.querySelectorAll('.input-form input').forEach(input => (input.value = ''));
+  };
+
+  const generate = () => {
+    // Generate logic
+    alert('Generate button clicked!');
+  };
+
+  // Example data for the DataGrid
+  const rows = [
+    { id: 1, firstName: 'John', lastName: 'Doe', age: 35 },
+    { id: 2, firstName: 'Jane', lastName: 'Smith', age: 28 },
+    { id: 3, firstName: 'James', lastName: 'Brown', age: 45 },
+    { id: 4, firstName: 'Emily', lastName: 'Davis', age: 32 },
+    { id: 5, firstName: 'Michael', lastName: 'Wilson', age: 40 },
+  ];
+
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 90 },
+    { field: 'firstName', headerName: 'First name', width: 150 },
+    { field: 'lastName', headerName: 'Last name', width: 150 },
+    { field: 'age', headerName: 'Age', type: 'number', width: 110 },
+  ];
+
+  return (
+    <div className="container">
+      <div className={`sidebar menu ${isMenuCollapsed ? 'collapsed' : ''}`}>
+        <button className="toggle-button" onClick={toggleMenu}>
+          <FontAwesomeIcon icon={isMenuCollapsed ? faAngleDoubleRight : faAngleDoubleLeft} />
+        </button>
+        {!isMenuCollapsed && (
+          <ul className="menu-items">
+            <li>
+              <FontAwesomeIcon icon={faHome} />
+            </li>
+            <li>
+              <FontAwesomeIcon icon={faUser} />
+            </li>
+            <li>
+              <FontAwesomeIcon icon={faCog} />
+            </li>
+          </ul>
+        )}
+      </div>
+      <div className="main-content">
+        <header className="header">
+          <h1>Get Network Page</h1>
+        </header>
+        <div className="data-grid-container">
+          <DataGrid rows={rows} columns={columns} pageSize={5} />
+        </div>
+      </div>
+      <div className={`sidebar form ${isFormCollapsed ? 'collapsed' : ''}`}>
+        <button className="toggle-button" onClick={toggleForm}>
+          <FontAwesomeIcon icon={isFormCollapsed ? faAngleDoubleRight : faAngleDoubleLeft} />
+        </button>
+        {!isFormCollapsed && (
+          <>
+            <form className="input-form">
+              {Array.from({ length: 10 }, (_, i) => (
+                <div key={i} className="form-group">
+                  <label htmlFor={`input${i}`}>Input {i + 1}</label>
+                  <input type="text" id={`input${i}`} name={`input${i}`} />
+                </div>
+              ))}
+            </form>
+            <div className="form-buttons">
+              <button onClick={clearAll}>Clear All</button>
+              <button onClick={generate}>Generate</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default GetNetworkPage;
