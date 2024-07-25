@@ -1,4 +1,4 @@
-
+<!-- 
 import React, { useState } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableFooter, Paper, Button, TablePagination, TextField, TableSortLabel, Box
@@ -291,37 +291,37 @@ export default App;
 
 
 const handleSubmit = (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // Generate the transactionID
-  const updatedFormData = {
-    ...formData,
-    header: {
-      ...formData.header,
-      transactionID: generateTransactionID(),
-    },
-  };
+    // Generate the transactionID
+    const updatedFormData = {
+      ...formData,
+      header: {
+        ...formData.header,
+        transactionID: generateTransactionID(),
+      },
+    };
 
-  getNetworks(updatedFormData).then((data) => {
-      try {
-        // Update the formData with the response
-        setFormData((prevState) => ({
-          ...prevState,
-          header: {
-            ...prevState.header,
-            transactionID: data.header.transactionID,
-          },
-        }));
+    getNetworks(updatedFormData).then((data) => {
+        try {
+          // Update the formData with the response
+          setFormData((prevState) => ({
+            ...prevState,
+            header: {
+              ...prevState.header,
+              transactionID: data.header.transactionID,
+            },
+          }));
 
-        // Your extra functions
-        console.log('Response from server:', data);
-      } catch (error) {
-        // Handle any errors in your extra functions
-        console.error('Error processing response:', error);
-      }
-    })
-    .catch((error) => {
-      // Handle network request errors
-      console.error('Error submitting form:', error);
-    });
-};
+          // Your extra functions
+          console.log('Response from server:', data);
+        } catch (error) {
+          // Handle any errors in your extra functions
+          console.error('Error processing response:', error);
+        }
+      })
+      .catch((error) => {
+        // Handle network request errors
+        console.error('Error submitting form:', error);
+      });
+  }; -->
