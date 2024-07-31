@@ -52,3 +52,57 @@ function ProcessData({ data }) {
 }
 
 export default ProcessData;
+
+
+import React, { useState } from 'react';
+
+const FetchDataComponent = () => {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchData = async () => {
+    const token = 'your_bearer_token_here'; // Replace with your actual token
+    const apiUrl = 'https://api.yourservice.com/data'; // Replace with your API URL
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          // Add your JSON request body here
+          key1: 'value1',
+          key2: 'value2'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <button onClick={fetchData}>Fetch Data</button>
+      {loading && <p>Loading...</p>}
+      {error && <p>Error: {error}</p>}
+      {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
+    </div>
+  );
+};
+
+export default FetchDataComponent;
