@@ -106,3 +106,119 @@ const FetchDataComponent = () => {
 };
 
 export default FetchDataComponent;
+--------------------------------------
+
+
+import React from 'react';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+
+// Provided JSON data
+const data = {
+    "addressAdditionalDetails": {
+        "totalNetworkOfCount": 16,
+        "weightedScore": {
+            "totalPoAKEYCount": 1,
+            "uniquePOAKEYs": [
+                {
+                    "lob": "8001",
+                    "POA_KEYS": [6001277984, 6001277985, 6001277986]
+                },
+                {
+                    "lob": "8002",
+                    "POA_KEYS": [6001277984, 6001277985]
+                }
+            ],
+            "weightedScores": [
+                {
+                    "networkID": "000000091",
+                    "weightedScoreOfNetwork": 1.0,
+                    "countOfPOAKEYs": 1,
+                    "POAKEYs": [6001277984, 6001277985, 6001277986]
+                },
+                {
+                    "networkID": "000000092",
+                    "weightedScoreOfNetwork": 1.0,
+                    "countOfPOAKEYs": 1,
+                    "POAKEYs": [6001277984, 6001277985]
+                },
+                {
+                    "networkID": "000000093",
+                    "weightedScoreOfNetwork": 1.0,
+                    "countOfPOAKEYs": 1,
+                    "POAKEYs": [6001277984, 6001277985, 6001277986]
+                },
+                {
+                    "networkID": "000000094",
+                    "weightedScoreOfNetwork": 1.0,
+                    "countOfPOAKEYs": 1,
+                    "POAKEYs": [6001277984, 6001277985, 6001277986]
+                }
+            ]
+        }
+    }
+};
+
+const NewConfidenceScore = () => {
+    const { uniquePOAKEYs, weightedScores } = data.addressAdditionalDetails.weightedScore;
+
+    // Extract all POA_KEYS and LOBs
+    const poaKeysData = uniquePOAKEYs.flatMap(entry =>
+        entry.POA_KEYS.map(poa_key => ({ lob: entry.lob, poa_key }))
+    );
+
+    // Extract all networkIDs and their weighted scores
+    const networkData = weightedScores.reduce((acc, score) => {
+        acc[score.networkID] = score.weightedScoreOfNetwork;
+        return acc;
+    }, {});
+
+    const networkIDs = Object.keys(networkData);
+
+    // Helper function to check if POA_KEY is present in networkID
+    const isPoaKeyInNetwork = (poa_key, networkID) => {
+        const network = weightedScores.find(score => score.networkID === networkID);
+        return network.POAKEYs.includes(poa_key);
+    };
+
+    return (
+        <TableContainer component={Paper}>
+            <Table>
+                <TableHead>
+                    <TableRow>
+                        
+                        <TableCell>POA_KEYS</TableCell>
+                        <TableCell>LOB</TableCell>
+                        {networkIDs.map(networkID => (
+                            <TableCell key={`${networkID}-header`}>{networkID}</TableCell>
+                        ))}
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Confidence Score</TableCell> {/* Empty cell for LOB */}
+                        <TableCell></TableCell> {/* Empty cell for POA_KEYS */}
+                        {networkIDs.map(networkID => (
+                            <TableCell key={`${networkID}-score`}>
+                                {networkData[networkID]}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {poaKeysData.map((row, index) => (
+                        <TableRow key={index}>
+                         
+                            <TableCell>{row.poa_key}</TableCell>
+                            <TableCell>{row.lob}</TableCell>
+                            {networkIDs.map(networkID => (
+                                <TableCell key={networkID}>
+                                    {isPoaKeyInNetwork(row.poa_key, networkID) ? 'Y' : 'N'}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </TableContainer>
+    );
+};
+
+export default NewConfidenceScore;
