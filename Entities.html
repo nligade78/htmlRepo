@@ -506,3 +506,28 @@ const Data = () => {
 
 export default Data;
 
+          ------
+          import React from 'react';
+import { TextField, MenuItem } from '@material-ui/core';
+
+const SelectComponent = ({ label, name, value, onChange, options = [], isDisabled = false }) => (
+  <TextField
+    select
+    label={label}
+    name={name}
+    value={value}
+    onChange={onChange}
+    disabled={isDisabled}
+    fullWidth
+  >
+    {options.map((option) => (
+      <MenuItem key={option.value} value={option.value}>
+        {option.label}
+      </MenuItem>
+    ))}
+  </TextField>
+);
+
+export default SelectComponent;
+
+
