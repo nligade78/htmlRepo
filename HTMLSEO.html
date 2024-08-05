@@ -12,3 +12,15 @@
          Heading Tags: Use appropriate heading tags (<h1>,<h2>,etc)  to structure the content-->
 </body>
 </html>
+
+
+const getProviderOptions = (transactionType) => {
+  switch (transactionType) {
+    case "Add Address":
+      return [{ value: "Professional Org", label: "Professional Org" }];
+    case "Update Linkage":
+      return [{ value: "Individual", label: "Individual" }];
+    default:
+      return allProviderTypeOptions;
+  }
+};
