@@ -1,0 +1,126 @@
+import React, { useState } from 'react';
+import { lobOptions, transactionTypeOptions } from './options';
+import TextFieldComponent from '../InputesFields/TextFieldComponent';
+import SelectComponent from '../InputesFields/SelectComponent';
+import MultiSelectComponent from '../InputesFields/MultiSelectComponent';
+
+// Define all provider type options
+const allProviderTypeOptions = [
+  { value: "181", label: "Professional Org" },
+  { value: "182", label: "Individual" },
+];
+
+// Function to get provider options based on transaction type
+const getProviderOptions = (transactionType) => {
+  switch (transactionType) {
+    case "Add Address":
+      return [{ value: "181", label: "Professional Org" }];
+    case "Update Linkage":
+      return [{ value: "182", label: "Individual" }];
+    default:
+      return allProviderTypeOptions;
+  }
+};
+
+const initialJson181 = {
+  "header": {
+    "transactionID": "",
+    "name": "",
+    "hobbies": [],
+    "ticketType": ""
+  },
+  "Profile": {
+    "abc": "",
+    "keyData": {
+      "IND_NPI": "",
+      "ORG_NPI": "",
+      "TIN": "",
+      "ZIP": "",
+      "SPECIALITY_CODE": "",
+      "typeCode": "",
+      "LOB": []
+    }
+  },
+  "providerAddress": [
+    {
+      "address": {
+        "id": "",
+        "keyData": {
+          "typeCode": "",
+          "addressLine1": "",
+          "zipCode": ""
+        }
+      }
+    }
+  ]
+};
+
+const Data = () => {
+  const [formData, setFormData] = useState(initialJson181);
+  const [providerOptions, setProviderOptions] = useState(allProviderTypeOptions);
+  const [isProviderTypeDisabled, setIsProviderTypeDisabled] = useState(false);
+
+  const handleTransactionTypeChange = (e) => {
+    const { value } = e.target;
+    let selectedProviderType = "";
+
+    if (value === "Add Address") {
+      selectedProviderType = "181";
+    } else if (value === "Update Linkage") {
+      selectedProviderType = "182";
+    }
+
+    setFormData((prevState) => ({
+      ...prevState,
+      header: {
+        ...prevState.header,
+        ticketType: value,
+      },
+      Profile: {
+        ...prevState.Profile,
+        keyData: {
+          ...prevState.Profile.keyData,
+          typeCode: selectedProviderType,
+        },
+      },
+    }));
+
+    // Update provider options based on selected transaction type
+    setProviderOptions(getProviderOptions(value));
+    setIsProviderTypeDisabled(true);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Submitted JSON:', formData);
+  };
+
+  return (
+    <div>
+      <h1>Dynamic JSON Form</h1>
+      <form onSubmit={handleSubmit}>
+        <SelectComponent
+          label="Transaction Type"
+          name="header.ticketType"
+          value={formData.header.ticketType || ''}
+          onChange={handleTransactionTypeChange}
+          options={transactionTypeOptions}
+        />
+        <SelectComponent
+          label="Provider Type"
+          name="Profile.keyData.typeCode"
+          value={formData.Profile.keyData.typeCode || ''}
+          onChange={() => {}}
+          options={providerOptions}
+          isDisabled={isProviderTypeDisabled} // Disable provider type select
+        />
+        <button type="submit">Submit</button>
+        <button type="button" >Clear</button>
+      </form>
+      <h2>Generated JSON:</h2>
+      <pre>{JSON.stringify(formData, null, 2)}</pre>
+    </div>
+  );
+};
+
+export default Data;
