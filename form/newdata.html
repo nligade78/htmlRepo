@@ -1,0 +1,195 @@
+import React, { useState } from 'react';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from '@mui/material';
+
+// Provided JSON data
+const data = {
+    "addressAdditionalDetails": {
+        "totalNetworkOfCount": 16,
+        "weightedScore": {
+            "totalPoAKEYCount": 1,
+            "uniquePOAKEYs": [
+                {
+                    "lob": "8001",
+                    "POA_KEYS": [6001277984, 6001277985, 6001277986]
+                },
+                {
+                    "lob": "8002",
+                    "POA_KEYS": [6001277984, 6001277985]
+                }
+            ],
+            "weightedScores": [
+                {
+                    "networkID": "000000091",
+                    "weightedScoreOfNetwork": 1.0,
+                    "countOfPOAKEYs": 1,
+                    "POAKEYs": [6001277984, 6001277985, 6001277986]
+                },
+                {
+                    "networkID": "000000092",
+                    "weightedScoreOfNetwork": 1.0,
+                    "countOfPOAKEYs": 1,
+                    "POAKEYs": [6001277984, 6001277985]
+                },
+                {
+                    "networkID": "000000093",
+                    "weightedScoreOfNetwork": 1.0,
+                    "countOfPOAKEYs": 1,
+                    "POAKEYs": [6001277984, 6001277985, 6001277986]
+                },
+                {
+                    "networkID": "000000094",
+                    "weightedScoreOfNetwork": 1.0,
+                    "countOfPOAKEYs": 1,
+                    "POAKEYs": [6001277984, 6001277985, 6001277986]
+                }
+            ]
+        }
+    }
+};
+
+const NewConfidenceScore = () => {
+    const [transposed, setTransposed] = useState(false);
+    const { uniquePOAKEYs, weightedScores } = data.addressAdditionalDetails.weightedScore;
+
+    // Extract all POA_KEYS and LOBs
+    const poaKeysData = uniquePOAKEYs.flatMap(entry =>
+        entry.POA_KEYS.map(poa_key => ({ lob: entry.lob, poa_key }))
+    );
+
+    // Extract all networkIDs and their weighted scores
+    const networkData = weightedScores.reduce((acc, score) => {
+        acc[score.networkID] = score.weightedScoreOfNetwork;
+        return acc;
+    }, {});
+
+    const networkIDs = Object.keys(networkData);
+
+    // Helper function to check if POA_KEY is present in networkID
+    const isPoaKeyInNetwork = (poa_key, networkID) => {
+        const network = weightedScores.find(score => score.networkID === networkID);
+        return network.POAKEYs.includes(poa_key);
+    };
+
+    const renderTable = () => {
+        if (transposed) {
+            return (
+                <>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Network ID</TableCell>
+                            {poaKeysData.map((row, index) => (
+                                <TableCell key={`poa-${index}`}>{row.poa_key}</TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Confidence Score</TableCell>
+                            {networkIDs.map(networkID => (
+                                <TableCell key={`${networkID}-score`}>
+                                    {networkData[networkID]}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>LOB</TableCell>
+                            {poaKeysData.map((row, index) => (
+                                <TableCell key={`lob-${index}`}>
+                                    {row.lob}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {networkIDs.map((networkID, index) => (
+                            <TableRow key={networkID}>
+                                <TableCell>{networkID}</TableCell>
+                                {poaKeysData.map((row, poaIndex) => (
+                                    <TableCell key={poaIndex}>
+                                        {isPoaKeyInNetwork(row.poa_key, networkID) ? 'Y' : 'N'}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                    {/* <TableHead>
+                        <TableRow>
+                            <TableCell>Confidence Score</TableCell>
+                            {networkIDs.map(networkID => (
+                                <TableCell key={`${networkID}-score`}>
+                                    {networkData[networkID]}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>LOB</TableCell>
+                            {poaKeysData.map((row, index) => (
+                                <TableCell key={`lob-${index}`}>
+                                    {row.lob}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead> */}
+                </>
+            );
+        } else {
+            return (
+                <>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>POA_KEYS</TableCell>
+                            {networkIDs.map(networkID => (
+                                <TableCell key={`${networkID}-header`}>{networkID}</TableCell>
+                            ))}
+                        </TableRow>
+                        <TableRow>
+                            <TableCell>Confidence Score</TableCell>
+                            {networkIDs.map(networkID => (
+                                <TableCell key={`${networkID}-score`}>
+                                    {networkData[networkID]}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                        <TableRow>
+                            <TableCell>LOB</TableCell>
+                            {networkIDs.map((_, index) => (
+                                <TableCell key={`lob-${index}`}>
+                                    {poaKeysData[index]?.lob || ''}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {poaKeysData.map((row, index) => (
+                            <TableRow key={index}>
+                                <TableCell>{row.poa_key}</TableCell>
+                                {networkIDs.map(networkID => (
+                                    <TableCell key={networkID}>
+                                        {isPoaKeyInNetwork(row.poa_key, networkID) ? 'Y' : 'N'}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </>
+            );
+        }
+    };
+
+    return (
+        <TableContainer component={Paper}>
+            <Button onClick={() => setTransposed(!transposed)}>
+                {transposed ? 'Switch to Original View' : 'Transpose Table'}
+            </Button>
+            <Table>
+                {renderTable()}
+            </Table>
+        </TableContainer>
+    );
+};
+
+export default NewConfidenceScore;
