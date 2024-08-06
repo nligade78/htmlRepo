@@ -24,3 +24,153 @@ const getProviderOptions = (transactionType) => {
       return allProviderTypeOptions;
   }
 };
+
+----------------------
+import React, { useState, useMemo } from 'react';
+import { Paper, Button } from '@mui/material';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+
+// Provided JSON data
+const data = {
+  "addressAdditionalDetails": {
+    "totalNetworkOfCount": 16,
+    "weightedScore": {
+      "totalPoAKEYCount": 1,
+      "uniquePOAKEYs": [
+        {
+          "lob": "8001",
+          "POA_KEYS": [6001277984, 6001277985, 6001277986]
+        },
+        {
+          "lob": "8002",
+          "POA_KEYS": [6001277984, 6001277985]
+        }
+      ],
+      "weightedScores": [
+        {
+          "networkID": "000000091",
+          "weightedScoreOfNetwork": 1.0,
+          "countOfPOAKEYs": 1,
+          "POAKEYs": [6001277984, 6001277985, 6001277986]
+        },
+        {
+          "networkID": "000000092",
+          "weightedScoreOfNetwork": 1.0,
+          "countOfPOAKEYs": 1,
+          "POAKEYs": [6001277984, 6001277985]
+        },
+        {
+          "networkID": "000000093",
+          "weightedScoreOfNetwork": 1.0,
+          "countOfPOAKEYs": 1,
+          "POAKEYs": [6001277984, 6001277985, 6001277986]
+        },
+        {
+          "networkID": "000000094",
+          "weightedScoreOfNetwork": 1.0,
+          "countOfPOAKEYs": 1,
+          "POAKEYs": [6001277984, 6001277985, 6001277986]
+        }
+      ]
+    }
+  }
+};
+
+const NewConfidenceScore = () => {
+  const [transposed, setTransposed] = useState(false);
+
+  const { uniquePOAKEYs, weightedScores } = data.addressAdditionalDetails.weightedScore;
+
+  // Extract all POA_KEYS and LOBs
+  const poaKeysData = useMemo(() => uniquePOAKEYs.flatMap(entry =>
+    entry.POA_KEYS.map(poa_key => ({ lob: entry.lob, poa_key }))
+  ), [uniquePOAKEYs]);
+
+  // Extract all networkIDs and their weighted scores
+  const networkData = useMemo(() => weightedScores.reduce((acc, score) => {
+    acc[score.networkID] = score.weightedScoreOfNetwork;
+    return acc;
+  }, {}), [weightedScores]);
+
+  const networkIDs = useMemo(() => Object.keys(networkData), [networkData]);
+
+  // Helper function to check if POA_KEY is present in networkID
+  const isPoaKeyInNetwork = (poa_key, networkID) => {
+    const network = weightedScores.find(score => score.networkID === networkID);
+    return network ? network.POAKEYs.includes(poa_key) : false;
+  };
+
+  // Columns for Original View
+  const columnsOriginal = useMemo(() => [
+    { field: 'poa_key', headerName: 'POA_KEYS', width: 150 },
+    ...networkIDs.map(networkID => ({
+      field: networkID,
+      headerName: networkID,
+      width: 150,
+      renderCell: (params) => (isPoaKeyInNetwork(params.row.poa_key, networkID) ? 'Y' : 'N')
+    })),
+    { field: 'weightedScore', headerName: 'Weighted Score', width: 150 }
+  ], [networkIDs, weightedScores]);
+
+  // Rows for Original View
+  const rowsOriginal = useMemo(() => poaKeysData.map((row, index) => ({
+    id: index,
+    ...row,
+    weightedScore: networkIDs.reduce((score, networkID) => {
+      const network = weightedScores.find(score => score.networkID === networkID);
+      if (network && network.POAKEYs.includes(row.poa_key)) {
+        return network.weightedScoreOfNetwork;
+      }
+      return score;
+    }, 0) // Default to 0 if no matching network is found
+  })), [poaKeysData, networkIDs, weightedScores]);
+
+  // Columns for Transposed View
+  const columnsTransposed = useMemo(() => [
+    { field: 'networkID', headerName: 'Network ID', width: 150 },
+    { field: 'weightedScore', headerName: 'Confidence Score', width: 150 },
+    { field: 'lob', headerName: 'LOB', width: 150 },
+    ...uniquePOAKEYs.flatMap(entry =>
+      entry.POA_KEYS.map(poa_key => ({
+        field: `poa_key_${poa_key}`,
+        headerName: poa_key.toString(),
+        width: 150,
+        renderCell: (params) => {
+          return isPoaKeyInNetwork(poa_key, params.row.networkID) ? 'Y' : 'N';
+        }
+      }))
+    )
+  ], [uniquePOAKEYs, weightedScores]);
+
+  // Rows for Transposed View
+  const rowsTransposed = useMemo(() => networkIDs.map((networkID, index) => ({
+    id: index,
+    networkID,
+    weightedScore: networkData[networkID],
+    lob: uniquePOAKEYs.find(entry => entry.POA_KEYS.some(poa_key => isPoaKeyInNetwork(poa_key, networkID)))?.lob || ''
+  })), [networkIDs, networkData, uniquePOAKEYs]);
+
+  return (
+    <Paper>
+      <Button onClick={() => setTransposed(prev => !prev)} style={{ marginBottom: '16px' }}>
+        {transposed ? 'Switch to Original View' : 'Transpose Table'}
+      </Button>
+      <DataGrid
+        key={transposed ? 'transposed' : 'original'} // Key to force re-render
+        rows={transposed ? rowsTransposed : rowsOriginal}
+        columns={transposed ? columnsTransposed : columnsOriginal}
+        pageSize={5}
+        autoHeight
+        components={{ Toolbar: GridToolbar }}
+        componentsProps={{
+          toolbar: {
+            showQuickFilter: true,
+          },
+        }}
+      />
+    </Paper>
+  );
+};
+
+export default NewConfidenceScore;
+
