@@ -126,3 +126,23 @@ const ExampleComponent = () => {
 };
 
 export default ExampleComponent;
+-----------------------------------------
+// Add Address Details row
+  const addressDetailsRow = { id: 'addressDetails', attribute: 'Address Details', value: 'Address Details' };
+  networkNames.forEach(network => {
+    const networkData = networks.find(net => net.networkID === network);
+    if (networkData) {
+      const uniquePOAKeysForLOB = data.addressAdditionalDetails.weightedScore.uniquePOAKEYs.find(uni => uni.lob === networkData.lobCode);
+      if (uniquePOAKeysForLOB) {
+        const addressDetails = uniquePOAKeysForLOB.addressDetails.map(address => {
+          return `${address.address.AddressLine1} ${address.address.AddressLine2}, ${address.address.City}, ${address.address.STATE} ${address.address.ZIP}`;
+        }).join(' | ');
+        addressDetailsRow[network] = addressDetails;
+      } else {
+        addressDetailsRow[network] = '';
+      }
+    } else {
+      addressDetailsRow[network] = '';
+    }
+  });
+  rows.push(addressDetailsRow);
