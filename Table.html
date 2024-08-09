@@ -119,3 +119,110 @@
             
         </body>
         </html>
+        --------------------------
+        import React, { useMemo } from 'react';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+
+const data = {
+  "addressAdditionalDetails": {
+    "totalNetworkOfCount": 16,
+    "weightedScore": {
+      "totalPoAKEYCount": 1,
+      "uniquePOAKEYs": [
+        {
+          "lob": "8001",
+          "addressDetails": [
+            { "POA_KEY": 6001277984, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "94597", "STATE": "Creek" } },
+            { "POA_KEY": 600127784, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Crek" } },
+            { "POA_KEY": 600177984, "address": { "AddressLine1": "169 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Creek" } }
+          ]
+        },
+        {
+          "lob": "8002",
+          "addressDetails": [
+            { "POA_KEY": 6001277984, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "94597", "STATE": "Creek" } },
+            { "POA_KEY": 600127784, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Crek" } },
+            { "POA_KEY": 600177984, "address": { "AddressLine1": "169 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Creek" } },
+            { "POA_KEY": 6001779800, "address": { "AddressLine1": "169 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Creek" } }
+          ]
+        }
+      ],
+      "weightedScores": [
+        { "networkID": "000000091", "lobCode": "8001", "lobName": "Commercial", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784, 600177984] },
+        { "networkID": "000000092", "lobCode": "8001", "lobName": "Commercial", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784] },
+        { "networkID": "00000006", "lobCode": "8002", "lobName": "Commercial", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784, 600177984] },
+        { "networkID": "000500092", "lobCode": "8002", "lobName": "Commercial", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784, 6001779800] }
+      ],
+      "average": [
+        { "LOB": 8001, "weightedScore": 0.64 },
+        { "LOB": 8002, "weightedScore": 0.64 }
+      ]
+    }
+  }
+};
+
+function POAKeyDataGrid() {
+
+  // Extract unique POA_KEYs and their addresses
+  const uniquePOAKEYs = useMemo(() => {
+    const poaKeyMap = new Map();
+    data.addressAdditionalDetails.weightedScore.uniquePOAKEYs.forEach(item => {
+      item.addressDetails.forEach(detail => {
+        poaKeyMap.set(detail.POA_KEY, detail.address);
+      });
+    });
+    return Array.from(poaKeyMap.entries());
+  }, [data]);
+
+  // Prepare rows for DataGrid
+  const rows = useMemo(() => {
+  
+
+    const addressRow = { id: 'address', networkID: 'Address Details', lobCode: '', weightedScoreOfNetwork: '' };
+    uniquePOAKEYs.forEach(([poaKey, address]) => {
+      addressRow[`POA_KEY_${poaKey}`] = `${address.AddressLine1}, ${address.AddressLine2}, ${address.City}, ${address.STATE} ${address.ZIP}`;
+    });
+
+    const dataRows = data.addressAdditionalDetails.weightedScore.weightedScores.map((network, index) => ({
+      id: index + 2,
+      networkID: network.networkID,
+      lobCode: network.lobCode,
+      weightedScoreOfNetwork: network.weightedScoreOfNetwork,
+      ...Object.fromEntries(uniquePOAKEYs.map(([poaKey]) => [`POA_KEY_${poaKey}`, network.POAKEYs.includes(poaKey) ? 'Y' : 'N']))
+    }));
+
+    return [ addressRow, ...dataRows];
+  }, [data, uniquePOAKEYs]);
+
+  // Define columns
+  const columns = useMemo(() => [
+    { field: 'networkID', headerName: 'Network ID', width: 150 },
+    { field: 'lobCode', headerName: 'LOB Code', width: 150 },
+    { field: 'weightedScoreOfNetwork', headerName: 'Weighted Score', width: 150 },
+    ...uniquePOAKEYs.map(([poaKey]) => ({
+      field: `POA_KEY_${poaKey}`,
+      headerName: `${poaKey}`,
+      width: 150,
+    })),
+  ], [uniquePOAKEYs]);
+
+  return (
+    <div style={{ width: '100%' }}>
+      <div style={{ height: 400, width: '100%' }}>
+        <DataGrid 
+          rows={rows} 
+          columns={columns} 
+          pageSize={5} 
+          checkboxSelection 
+          autoHeight  
+          slots={{ toolbar: GridToolbar }}
+          slotProps={{
+            toolbar: { showQuickFilter: true },
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+export default POAKeyDataGrid;
