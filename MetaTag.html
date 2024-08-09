@@ -15,3 +15,114 @@ Meta tag are HTML elements that provide metadata about a webpage. They are place
     
 </body>
 </html>
+----------------------------------
+import React from 'react';
+import { DataGrid } from '@mui/x-data-grid';
+
+// Sample data provided
+const data = {
+  "addressAdditionalDetails": {
+    "totalNetworkOfCount": 16,
+    "weightedScore": {
+      "totalPoAKEYCount": 1,
+      "uniquePOAKEYs": [
+        {
+          "lob": "8001",
+          "addressDetails": [
+            { "POA_KEY": 6001277984, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "94597", "STATE": "Creek" } },
+            { "POA_KEY": 600127784, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Crek" } },
+            { "POA_KEY": 600177984, "address": { "AddressLine1": "169 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Creek" } }
+          ]
+        },
+        {
+          "lob": "8002",
+          "addressDetails": [
+            { "POA_KEY": 6001277984, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "94597", "STATE": "Creek" } },
+            { "POA_KEY": 600127784, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Crek" } },
+            { "POA_KEY": 600177984, "address": { "AddressLine1": "169 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Creek" } },
+            { "POA_KEY": 6001779800, "address": { "AddressLine1": "169 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Creek" } }
+          ]
+        }
+      ],
+      "weightedScores": [
+        { "networkID": "000000091", "lobCode": "8001", "lobName": "Commercial", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784, 600177984] },
+        { "networkID": "000000092", "lobCode": "8001", "lobName": "Commercial", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784] },
+        { "networkID": "00000006", "lobCode": "8002", "lobCode": "8002", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784, 600177984] },
+        { "networkID": "000500092", "lobCode": "8002", "lobName": "Commercial", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784, 6001779800] }
+      ],
+      "average": [
+        { "LOB": 8001, "weightedScore": 0.64 },
+        { "LOB": 8002, "weightedScore": 0.64 }
+      ]
+    }
+  }
+};
+
+const ExampleComponent = () => {
+  const networks = data.addressAdditionalDetails.weightedScore.weightedScores;
+  const uniquePOAKeys = new Set();
+  const networkNames = [];
+  const poaKeyCounts = {};
+
+  // Extract network information and unique POA_KEYs
+  networks.forEach(network => {
+    networkNames.push(network.networkID);
+    network.POAKEYs.forEach(poaKey => {
+      uniquePOAKeys.add(poaKey);
+      if (!poaKeyCounts[poaKey]) {
+        poaKeyCounts[poaKey] = 0;
+      }
+      poaKeyCounts[poaKey]++;
+    });
+  });
+
+  const uniquePOAKeysArray = Array.from(uniquePOAKeys);
+
+  const columns = [
+    { field: 'value', headerName: 'POA_KEY', width: 200 },
+    ...networkNames.map(network => ({ field: network, headerName: network, width: 200 })),
+  ];
+
+  const rows = [];
+
+  // Add confidence score row
+  const confidenceScoreRow = { id: 'confidenceScore', attribute: 'ConfidenceScore', value: 'ConfidenceScore' };
+  networkNames.forEach(network => {
+    const networkData = networks.find(net => net.networkID === network);
+    confidenceScoreRow[network] = networkData.weightedScoreOfNetwork;
+  });
+  rows.push(confidenceScoreRow);
+
+  // Add confidence score row
+  const LOB = { id: 'LOB', attribute: 'LOB', value: 'LOB' };
+  networkNames.forEach(network => {
+    const networkData = networks.find(net => net.networkID === network);
+    LOB[network] = networkData.lobCode;
+  });
+  rows.push(LOB);
+
+  // Add POA_KEYs rows
+  uniquePOAKeysArray.forEach((poaKey, index) => {
+    const row = { id: index, attribute: 'POA_KEY', value: poaKey };
+    networkNames.forEach(network => {
+      const networkData = networks.find(net => net.networkID === network);
+      row[network] = networkData.POAKEYs.includes(poaKey) ? 'Y' : 'N';
+    });
+    rows.push(row);
+  });
+
+  return (
+    <div style={{ height: 600, width: '100%' }}>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        pageSize={10}
+        rowsPerPageOptions={[10]}
+        checkboxSelection
+        disableSelectionOnClick
+      />
+    </div>
+  );
+};
+
+export default ExampleComponent;
