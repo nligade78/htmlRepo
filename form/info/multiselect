@@ -25,3 +25,132 @@ const MultiSelectComponent = ({ label, name, value, onChange, options = [] }) =>
 };
 
 export default MultiSelectComponent;
+----------------------------------------------------------
+import React, { useMemo } from 'react';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Divider } from '@mui/material';
+
+const data = {
+  "addressAdditionalDetails": {
+    "totalNetworkOfCount": 16,
+    "weightedScore": {
+      "totalPoAKEYCount": 1,
+      "uniquePOAKEYs": [
+        {
+          "lob": "8001",
+          "addressDetails": [
+            { "POA_KEY": 6001277984, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "94597", "STATE": "Creek" } },
+            { "POA_KEY": 600127784, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Crek" } },
+            { "POA_KEY": 600177984, "address": { "AddressLine1": "169 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Creek" } }
+          ]
+        },
+        {
+          "lob": "8002",
+          "addressDetails": [
+            { "POA_KEY": 6001277984, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "94597", "STATE": "Creek" } },
+            { "POA_KEY": 600127784, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Crek" } },
+            { "POA_KEY": 600177984, "address": { "AddressLine1": "169 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Creek" } },
+            { "POA_KEY": 6001779800, "address": { "AddressLine1": "169 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Creek" } }
+          ]
+        }
+      ],
+      "weightedScores": [
+        { "networkID": "000000091", "lobCode": "8001", "lobName": "Commercial", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784, 600177984] },
+        { "networkID": "000000092", "lobCode": "8001", "lobName": "Commercial", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784] },
+        { "networkID": "00000006", "lobCode": "8002", "lobName": "Commercial", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784, 600177984] },
+        { "networkID": "000500092", "lobCode": "8002", "lobName": "Commercial", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784, 6001779800] }
+      ],
+      "average": [
+        { "LOB": 8001, "weightedScore": 0.64 },
+        { "LOB": 8002, "weightedScore": 0.64 }
+      ]
+    }
+  }
+};
+
+function POAKeyDataGrid() {
+  // UseMemo to extract unique POA_KEYs
+  const uniquePOAKEYs = useMemo(() => 
+    Array.from(new Set(data.addressAdditionalDetails.weightedScore.uniquePOAKEYs.flatMap(item => 
+      item.addressDetails.map(detail => detail.POA_KEY)
+    ))), 
+    [data]
+  );
+
+  // UseMemo to prepare rows for DataGrid
+  const rows = useMemo(() => 
+    data.addressAdditionalDetails.weightedScore.weightedScores.map((network, index) => ({
+      id: index + 1,
+      networkID: network.networkID,
+      lobCode: network.lobCode,
+      weightedScoreOfNetwork: network.weightedScoreOfNetwork,
+      ...Object.fromEntries(uniquePOAKEYs.map(poaKey => [`POA_KEY_${poaKey}`, network.POAKEYs.includes(poaKey) ? 'Y' : 'N']))
+    })),
+    [data, uniquePOAKEYs]
+  );
+
+  // UseMemo to define columns for DataGrid
+  const columns = useMemo(() => [
+    { field: 'networkID', headerName: 'Network ID', width: 150 },
+    { field: 'lobCode', headerName: 'LOB Code', width: 150 },
+    { field: 'weightedScoreOfNetwork', headerName: 'Weighted Score', width: 150 },
+    ...uniquePOAKEYs.map(poaKey => ({
+      field: `POA_KEY_${poaKey}`,
+      headerName: `${poaKey}`,
+      width: 150,
+    })),
+  ], [uniquePOAKEYs]);
+
+  // UseMemo to prepare rows for the average table
+  const averageRows = useMemo(() => 
+    data.addressAdditionalDetails.weightedScore.average.map((avg, index) => ({
+      id: index + 1,
+      LOB: avg.LOB,
+      weightedScore: avg.weightedScore
+    })),
+    [data]
+  );
+
+  return (
+    <div style={{ width: '100%' }}>
+      <Typography variant="h7" style={{ marginBottom: '16px' }}>
+       Average Confidence Score
+      </Typography>
+      <TableContainer component={Paper} style={{ marginBottom: '16px' }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell align="left" style={{ paddingRight: '1px', paddingLeft: '5px' }}>LOB</TableCell>
+              <TableCell align="left" style={{ paddingLeft: '1px', paddingRight: '5px' }}>Weighted Score</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {averageRows.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell align="left" style={{ paddingRight: '1px', paddingLeft: '5px' }}>{row.LOB}</TableCell>
+                <TableCell align="left" style={{ paddingLeft: '1px', paddingRight: '5px' }}>{row.weightedScore}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <Divider style={{ marginTop: '8px' }} />
+      </TableContainer>
+      <div style={{ height: 400, width: '100%' }}>
+        <DataGrid 
+          rows={rows} 
+          columns={columns} 
+          pageSize={5} 
+          checkboxSelection 
+          autoHeight  
+          slots={{ toolbar: GridToolbar }}
+          slotProps={{
+            toolbar: { showQuickFilter: true },
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+export default POAKeyDataGrid;
+
