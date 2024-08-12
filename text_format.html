@@ -77,3 +77,75 @@
         
     </body>
     </html>
+    --------------------------------------------------
+    import React, { useState } from 'react';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import { DataGrid } from '@mui/x-data-grid';
+
+const PopupWithTables = () => {
+  const [open, setOpen] = useState(false);
+  const [showMainTable, setShowMainTable] = useState(true);
+
+  // Example data for the tables
+  const mainTableData = [
+    { id: 1, col1: 'Main Row 1', col2: 'Main Row 1 Details' },
+    { id: 2, col1: 'Main Row 2', col2: 'Main Row 2 Details' },
+  ];
+
+  const newTableData = [
+    { id: 1, col1: 'New Row 1', col2: 'New Row 1 Details' },
+    { id: 2, col1: 'New Row 2', col2: 'New Row 2 Details' },
+  ];
+
+  const columns = [
+    { field: 'col1', headerName: 'Column 1', width: 150 },
+    { field: 'col2', headerName: 'Column 2', width: 150 },
+  ];
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const toggleTable = () => {
+    setShowMainTable(!showMainTable);
+  };
+
+  return (
+    <div>
+      <Button variant="contained" onClick={handleClickOpen}>
+        Details
+      </Button>
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Button variant="contained" onClick={toggleTable}>
+            {showMainTable ? 'Show New Table' : 'Show Main Table'}
+          </Button>
+          <IconButton onClick={handleClose} color="primary">
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <div style={{ height: 300, width: '100%' }}>
+            <DataGrid
+              rows={showMainTable ? mainTableData : newTableData}
+              columns={columns}
+              pageSize={5}
+            />
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
+};
+
+export default PopupWithTables;
