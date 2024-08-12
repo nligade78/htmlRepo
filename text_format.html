@@ -149,3 +149,19 @@ const PopupWithTables = () => {
 };
 
 export default PopupWithTables;
+--------------------------------
+ // Add Address Details row for each POA_KEY
+  uniquePOAKeysArray.forEach((poaKey, index) => {
+    const row = { id: index, attribute: 'POA_KEY', value: poaKey };
+    networkNames.forEach(network => {
+      const networkData = networks.find(net => net.networkID === network);
+      const uniquePOAKeysForLOB = data.addressAdditionalDetails.weightedScore.uniquePOAKEYs.find(uni => uni.lob === networkData.lobCode);
+      if (uniquePOAKeysForLOB) {
+        const address = uniquePOAKeysForLOB.addressDetails.find(detail => detail.POA_KEY === poaKey)?.address;
+        row.addressDetails = address ? `${address.AddressLine1}, ${address.AddressLine2}, ${address.City}, ${address.STATE} ${address.ZIP}` : '';
+      }
+      row[network] = networkData.POAKEYs.includes(poaKey) ? 'Y' : 'N';
+    });
+    rows.push(row);
+  });
+
