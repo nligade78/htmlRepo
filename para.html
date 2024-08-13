@@ -30,29 +30,132 @@
     </html>
     --------------------------
 
-    uniquePOAKeysArray.forEach((poaKey, index) => {
-  const row = { id: `poaKey-${poaKey}-network-${index}`, attribute: 'POA_KEY', value: poaKey };
-  
-  networkNames.forEach(network => {
-    const networkData = networks.find(net => net.networkID === network);
-    const uniquePOAKeysForLOB = data.addressAdditionalDetails.weightedScore.uniquePOAKEYs.find(uni => uni.lob === networkData?.lobCode);
-    
-    if (uniquePOAKeysForLOB) {
-      const address = uniquePOAKeysForLOB.addressDetails.find(detail => detail.POA_KEY === poaKey)?.address;
-      row.addressDetails = address 
-        ? `${address.AddressLine1 || ''}, ${address.AddressLine2 || ''}, ${address.City || ''}, ${address.STATE || ''} ${address.ZIP || ''}`
-          .replace(/,\s*,/g, ', ').trim()
-        : '';
-    } else {
-      row.addressDetails = '';
-    }
+   import React from 'react';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 
-    row[network] = networkData?.POAKEYs.includes(poaKey) ? 'Y' : 'N';
+// Sample data provided
+const data = {
+  "addressAdditionalDetails": {
+    "totalNetworkOfCount": 16,
+    "weightedScore": {
+      "totalPoAKEYCount": 1,
+      "uniquePOAKEYs": [
+        {
+          "lob": "8001",
+          "addressDetails": [
+            { "POA_KEY": 6001277984, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "94597", "STATE": "Creek" } },
+            { "POA_KEY": 600127784, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Crek" } },
+            { "POA_KEY": 600177984, "address": { "AddressLine1": "169 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Creek" } }
+          ]
+        },
+        {
+          "lob": "8002",
+          "addressDetails": [
+            { "POA_KEY": 6001277984, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "94597", "STATE": "Creek" } },
+            { "POA_KEY": 600127784, "address": { "AddressLine1": "1690 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Crek" } },
+            { "POA_KEY": 600177984, "address": { "AddressLine1": "169 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Creek" } },
+            { "POA_KEY": 6001779800, "address": { "AddressLine1": "169 Cam", "AddressLine2": "Ste Cam", "City": "", "ZIP": "9497", "STATE": "Creek" } }
+          ]
+        }
+      ],
+      "weightedScores": [
+        { "networkID": "000000091", "lobCode": "8001", "lobName": "Commercial", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784, 600177984] },
+        { "networkID": "000000092", "lobCode": "8001", "lobName": "Commercial", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784] },
+        { "networkID": "00000006", "lobCode": "8002", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784, 600177984] },
+        { "networkID": "000500092", "lobCode": "8002", "lobName": "Commercial", "weightedScoreOfNetwork": 1.0, "countOfPOAKEYs": 1, "POAKEYs": [6001277984, 600127784, 6001779800] }
+      ],
+      "average": [
+        { "LOB": 8001, "weightedScore": 0.64 },
+        { "LOB": 8002, "weightedScore": 0.64 }
+      ]
+    }
+  }
+};
+
+const ExampleComponent = () => {
+  const networks = data.addressAdditionalDetails.weightedScore.weightedScores;
+  const uniquePOAKeys = new Set();
+  const networkNames = [];
+  const poaKeyCounts = {};
+
+  // Extract network information and unique POA_KEYs
+  networks.forEach(network => {
+    networkNames.push(network.networkID);
+    network.POAKEYs.forEach(poaKey => {
+      uniquePOAKeys.add(poaKey);
+      if (!poaKeyCounts[poaKey]) {
+        poaKeyCounts[poaKey] = 0;
+      }
+      poaKeyCounts[poaKey]++;
+    });
   });
 
-  // Apply set() function to finalize the row object before pushing it to rows
-  rows.push(new Set(Object.entries(row)).reduce((obj, [key, value]) => {
-    obj[key] = value;
-    return obj;
-  }, {}));
-});
+  const uniquePOAKeysArray = Array.from(uniquePOAKeys);
+
+  // Add "Address Details" column
+  const columns = [
+    { field: 'value', headerName: 'POA_KEY', width: 200 },
+    { field: 'addressDetails', headerName: 'Address Details', width: 400 },
+    ...networkNames.map(network => ({ field: network, headerName: network, width: 200 })),
+  ];
+
+  const rows = [];
+
+  // Add confidence score row
+  const confidenceScoreRow = { id: 'confidenceScore', attribute: 'ConfidenceScore', value: 'ConfidenceScore' };
+  networkNames.forEach(network => {
+    const networkData = networks.find(net => net.networkID === network);
+    confidenceScoreRow[network] = networkData?.weightedScoreOfNetwork || '';
+  });
+  rows.push(confidenceScoreRow);
+
+  // Add LOB row
+  const LOB = { id: 'lob', attribute: 'LOB', value: 'LOB' };
+  networkNames.forEach(network => {
+    const networkData = networks.find(net => net.networkID === network);
+    LOB[network] = networkData?.lobCode || '';
+  });
+  rows.push(LOB);
+
+  uniquePOAKeysArray.forEach((poaKey, index) => {
+    const row = { id: `poaKey-${poaKey}-network-${index}`, attribute: 'POA_KEY', value: poaKey };
+    
+    networkNames.forEach(network => {
+      const networkData = networks.find(net => net.networkID === network);
+      const uniquePOAKeysForLOB = data.addressAdditionalDetails.weightedScore.uniquePOAKEYs.find(uni => uni.lob === networkData?.lobCode);
+      
+      if (uniquePOAKeysForLOB) {
+        const address = uniquePOAKeysForLOB.addressDetails.find(detail => detail.POA_KEY === poaKey)?.address;
+        row.addressDetails = address 
+          ? `${address.AddressLine1 || ''}, ${address.AddressLine2 || ''}, ${address.City || ''}, ${address.STATE || ''} ${address.ZIP || ''}`
+            .replace(/,\s*,/g, ', ').trim()
+          : '';
+      } else {
+        row.addressDetails = '';
+      }
+  
+      row[network] = networkData?.POAKEYs.includes(poaKey) ? 'Y' : 'N';
+    });
+
+    rows.push(row);
+  });
+
+  return (
+    <div style={{ height: 600, width: '100%' }}>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        pageSize={10}
+        rowsPerPageOptions={[10]}
+        checkboxSelection
+        disableSelectionOnClick
+        slots={{ toolbar: GridToolbar }}
+        slotProps={{
+          toolbar: { showQuickFilter: true },
+        }}
+      />
+    </div>
+  );
+};
+
+export default ExampleComponent;
