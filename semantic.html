@@ -45,3 +45,28 @@
     
 </body>
 </html>
+---------------------------
+// Add Address Details row for each POA_KEY
+uniquePOAKeysArray.forEach((poaKey, index) => {
+  const row = { id: index, attribute: 'POA_KEY', value: poaKey };
+  let addressDetailsSet = false; // Flag to avoid overwriting address details
+
+  networkNames.forEach(network => {
+    const networkData = networks.find(net => net.networkID === network);
+    const uniquePOAKeysForLOB = data.addressAdditionalDetails.weightedScore.uniquePOAKEYs.find(uni => uni.lob === networkData?.lobCode);
+    
+    if (uniquePOAKeysForLOB && !addressDetailsSet) {
+      const address = uniquePOAKeysForLOB.addressDetails.find(detail => detail.POA_KEY === poaKey)?.address;
+      row.addressDetails = address 
+        ? `${address.AddressLine1 || '-'}, ${address.AddressLine2 || '-'}, ${address.City || '-'}, ${address.STATE || '-'} ${address.ZIP || '-'}`.replace(/,\s*,/g, ', ').trim()
+        : '-';
+      addressDetailsSet = true; // Set the flag to true after setting address details
+    } else if (!addressDetailsSet) {
+      row.addressDetails = '-';
+    }
+
+    row[network] = networkData?.POAKEYs.includes(poaKey) ? 'Y' : 'N';
+  });
+
+  rows.push(row);
+});
